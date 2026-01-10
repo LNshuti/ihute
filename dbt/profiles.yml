@@ -1,0 +1,15 @@
+nashville_incentive_sim:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: '../warehouse.duckdb'
+      threads: 4
+    prod:
+      type: duckdb
+      path: '../warehouse.duckdb'
+      threads: 8
+    ci:
+      type: duckdb
+      path: ':memory:'
+      threads: 4

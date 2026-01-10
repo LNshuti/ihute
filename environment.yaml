@@ -1,0 +1,14 @@
+name: ihute
+channels:
+  - conda-forge
+  - pytorch
+dependencies:
+  - python=3.12
+  - pytorch
+  - torchvision
+  - torchaudio 
+  - pip
+  - pip:
+    - deepspeed
+    - langchain
+    - faiss-cpu

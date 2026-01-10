@@ -1,0 +1,58 @@
+name: 'nashville_incentive_sim'
+version: '1.0.0'
+config-version: 2
+
+profile: 'nashville_incentive_sim'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  nashville_incentive_sim:
+    +materialized: view
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
+      core:
+        +materialized: table
+      traffic:
+        +materialized: table
+      incentives:
+        +materialized: table
+      behavioral:
+        +materialized: table
+      simulation:
+        +materialized: table
+
+vars:
+  # Nashville bounding box for coordinate validation
+  nashville_lat_min: 35.9
+  nashville_lat_max: 36.4
+  nashville_lon_min: -87.1
+  nashville_lon_max: -86.5
+
+  # I-24 corridor bounds
+  i24_lat_min: 36.05
+  i24_lat_max: 36.20
+  i24_lon_min: -86.90
+  i24_lon_max: -86.60
+
+  # Peak hours definition
+  am_peak_start: 7
+  am_peak_end: 9
+  pm_peak_start: 17
+  pm_peak_end: 19
