@@ -24,7 +24,7 @@ This project investigates algorithmic approaches to incentive-based congestion m
 | **Event Egress** | Flatten post-Titans game peaks | Departure delay & mode-shift rewards |
 | **Transit Promotion** | Encourage mode shift | Geofenced peak-period transit incentives |
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -50,7 +50,7 @@ This project investigates algorithmic approaches to incentive-based congestion m
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 nashville-incentive-sim/
@@ -164,7 +164,7 @@ python -m scripts.optimize --scenario titans_game --budget 50000 --algorithm gre
 python -m scripts.run_experiments --suite all --output results/
 ```
 
-## 📊 Data Sources
+## Data Sources
 
 ### Hytch Rideshare Data (Primary)
 
@@ -234,7 +234,7 @@ For multi-agent strategic interactions:
 - **Fictitious Play**: Learn from historical play
 - **Potential Games**: Exploit structure for faster convergence
 
-## 📈 Evaluation Metrics
+## Evaluation Metrics
 
 ### Computational Metrics
 - Runtime complexity (wall-clock, big-O)
@@ -254,7 +254,7 @@ For multi-agent strategic interactions:
 - Behavioral model fit (χ², KS test)
 - Simulation-to-reality gap
 
-## 🧪 Experiments
+## Experiments
 
 ### Experiment 1: Pacer Participation Threshold
 
@@ -286,7 +286,7 @@ python -m scripts.run_experiments --experiment event_egress \
     --total-delay-budget 1000
 ```
 
-## 📝 Configuration
+## Configuration
 
 Example configuration file (`configs/i24_corridor.yaml`):
 
@@ -346,7 +346,7 @@ output:
   plots: ["demand_profile", "speed_heatmap", "incentive_uptake"]
 ```
 
-## 🔧 Development
+## Development
 
 ### Running Tests
 
@@ -381,7 +381,7 @@ cd docs/
 make html
 ```
 
-## 📚 References
+## References
 
 ### Algorithmic Game Theory
 - Nisan et al. (2007). *Algorithmic Game Theory*. Cambridge University Press.
@@ -395,9 +395,7 @@ make html
 - Mirrokni et al. (2012). Optimal marketing strategies over social networks. *WWW*.
 - Chen et al. (2015). Peeking beneath the hood of Uber. *IMC*.
 
-## 👥 Contributors
+## Contributors
 
 - **Leonce Nshuti** - Primary Researcher - Vanderbilt University
-- **Dr. Daniel Work** - Faculty Advisor - Civil & Environmental Engineering, Computer Science
-- **VECTOR Research Team** - Vanderbilt Center for Transportation and Operational Resiliency
 - **MobileFlow/Hytch** - External Collaborator - Domain expertise and data access
