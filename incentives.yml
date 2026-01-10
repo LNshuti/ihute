@@ -1,0 +1,167 @@
+# Nashville Incentive Simulation Configuration
+# I-24 Corridor Carpooling Study
+
+simulation:
+  name: "I-24 Carpooling Incentive Study"
+  description: "Evaluate carpool incentive effectiveness on I-24 during rush hour"
+  duration_hours: 4.0
+  warmup_hours: 0.5
+  time_step_seconds: 1.0
+  random_seed: 42
+  
+  # Time window (seconds from midnight)
+  start_time: 21600  # 6:00 AM
+  end_time: 36000    # 10:00 AM
+
+network:
+  source: "osm"
+  cache_dir: "data/network_cache"
+  bounds:
+    north: 36.20
+    south: 36.05
+    east: -86.60
+    west: -86.90
+  corridors:
+    - name: "I-24"
+      osm_relation_id: 123456
+      direction: "inbound"  # Toward downtown
+    - name: "I-24"
+      osm_relation_id: 123457
+      direction: "outbound"
+
+agents:
+  total: 10000
+  
+  # Agent type distribution
+  types:
+    commuter:
+      fraction: 0.85
+      behavioral_model: "softmax"
+      temperature: 0.5
+      vot_mean: 25.0
+      vot_std: 10.0
+      
+    flexible_commuter:
+      fraction: 0.10
+      behavioral_model: "softmax"
+      temperature: 0.3
+      flexibility_window: 3600  # 1 hour
+      
+    fixed_schedule:
+      fraction: 0.05
+      behavioral_model: "utility_max"
+      flexibility_window: 300  # 5 minutes
+      
+  # Population parameters
+  population:
+    home_region:
+      center: [36.08, -86.65]  # Southeast Nashville suburbs
+      radius_km: 10
+    work_region:
+      center: [36.16, -86.78]  # Downtown Nashville
+      radius_km: 5
+    arrival_time:
+      mean_hour: 8.0
+      std_minutes: 30
+
+incentives:
+  # Carpool incentive
+  - type: "carpool"
+    enabled: true
+    reward_per_passenger: 2.50
+    min_passengers: 1
+    max_reward: 10.00
+    peak_hours: [7, 8, 9]
+    peak_multiplier: 1.5
+    corridor_ids: ["I-24"]
+    budget_daily: 10000
+    
+  # Pacer driving incentive (optional)
+  - type: "pacer"
+    enabled: false
+    reward_per_mile: 0.10
+    smoothness_threshold: 0.8
+    corridor_segments: ["I-24-seg-1", "I-24-seg-2", "I-24-seg-3"]
+    budget_daily: 5000
+
+optimization:
+  algorithm: "greedy"
+  budget_constraint: 50000
+  objective: "vmt_reduction"  # or "travel_time", "throughput"
+  
+  # Algorithm-specific parameters
+  greedy:
+    increment: 0.50
+    max_iterations: 10000
+    
+  genetic:
+    population_size: 100
+    generations: 100
+    mutation_rate: 0.1
+    crossover_rate: 0.8
+    
+  dynamic_programming:
+    discretization: 0.50
+
+behavioral_calibration:
+  data_source: "data/raw/hytch_trips.parquet"
+  model_type: "logistic"
+  
+  # Training/test split
+  train_end_date: "2022-01-01"
+  
+  # Features to include
+  features:
+    temporal: true
+    spatial: true
+    trip: true
+    incentive: true
+    normalize: true
+
+output:
+  directory: "results/i24_carpool_study"
+  
+  # What to save
+  save_trajectories: false
+  save_agent_history: false
+  save_metrics: true
+  
+  # Save frequency
+  metrics_interval_seconds: 300  # 5 minutes
+  
+  # Plots to generate
+  plots:
+    - "demand_profile"
+    - "speed_heatmap"
+    - "incentive_uptake"
+    - "travel_time_distribution"
+    - "mode_share"
+    
+  # Export formats
+  formats:
+    - "csv"
+    - "parquet"
+    - "json"
+
+experiments:
+  # Define parameter sweeps for sensitivity analysis
+  
+  - name: "incentive_level_sweep"
+    parameter: "incentives.0.reward_per_passenger"
+    values: [1.0, 2.0, 3.0, 5.0, 7.5, 10.0]
+    replications: 10
+    
+  - name: "participation_threshold"
+    parameter: "agents.types.commuter.temperature"
+    values: [0.1, 0.3, 0.5, 0.7, 1.0]
+    replications: 10
+    
+  - name: "budget_sensitivity"
+    parameter: "incentives.0.budget_daily"
+    values: [5000, 10000, 20000, 50000]
+    replications: 5
+
+logging:
+  level: "INFO"
+  file: "logs/simulation.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
