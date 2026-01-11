@@ -156,7 +156,6 @@ def render_traffic_flow_tab():
 
     with gr.Column():
         gr.Markdown("## Traffic Flow Analysis")
-        gr.Markdown("Real-time and historical traffic patterns on I-24 corridor")
 
         with gr.Row():
             with gr.Column(scale=2):

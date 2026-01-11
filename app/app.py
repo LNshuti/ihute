@@ -39,7 +39,6 @@ def create_traffic_tab():
     """Create traffic flow analysis tab."""
     with gr.Column():
         gr.Markdown("## Traffic Flow Analysis")
-        gr.Markdown("Real-time and historical traffic patterns on the I-24 corridor")
 
         heatmap_data = get_speed_heatmap_data()
         gr.Plot(value=create_speed_heatmap(heatmap_data), label="Speed Heatmap")

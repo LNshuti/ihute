@@ -63,7 +63,7 @@ def create_corridor_map(df: pd.DataFrame) -> go.Figure:
 
     fig.update_layout(
         mapbox=dict(
-            style='carto-positron',
+            style='open-street-map',
             center=dict(lat=36.12, lon=-86.75),
             zoom=11
         ),
@@ -94,7 +94,7 @@ def create_heatmap_overlay(df: pd.DataFrame) -> go.Figure:
 
     fig.update_layout(
         mapbox=dict(
-            style='carto-positron',
+            style='open-street-map',
             center=dict(lat=36.12, lon=-86.75),
             zoom=11
         ),
