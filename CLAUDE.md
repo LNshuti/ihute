@@ -104,6 +104,8 @@ cd app && python app.py               # Run Gradio dashboard locally
 
 ## Dashboard (`app/`)
 
+**Live Demo**: https://huggingface.co/spaces/LeonceNsh/nashville-incentive-simulation
+
 - `app.py` - Main Gradio application
 - `database.py` - DuckDB connection and query execution
 - `components/` - UI components for traffic flow heatmaps, incentive analytics, behavioral calibration, scenario comparison

@@ -195,17 +195,19 @@ def create_app():
             ---
             *Data sources: LADDMS I-24 MOTION trajectories, Hytch rideshare trips, simulation outputs*
 
-            Built with DuckDB, dbt, and Gradio | [GitHub](https://github.com/yourusername/nashville-incentive-sim)
+            Built with DuckDB, dbt, and Gradio | [GitHub](https://github.com/LNshuti/ihute)
             """
         )
 
     return app
 
 
-# Main entry point - defer creation until runtime
+# Create app instance for Hugging Face Spaces
+demo = create_app()
+
+# Main entry point for local development
 if __name__ == "__main__":
-    app = create_app()
-    app.launch(
+    demo.launch(
         server_name="0.0.0.0",
         share=False
     )
