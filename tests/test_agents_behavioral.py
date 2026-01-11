@@ -51,12 +51,20 @@ class TestLogitModel:
 
     def test_asc_for_carpool(self, model, preferences):
         """Carpool modes should have ASC."""
-        assert model._get_asc(TravelMode.CARPOOL_DRIVER, preferences) == preferences.asc_carpool
-        assert model._get_asc(TravelMode.CARPOOL_PASSENGER, preferences) == preferences.asc_carpool
+        assert (
+            model._get_asc(TravelMode.CARPOOL_DRIVER, preferences)
+            == preferences.asc_carpool
+        )
+        assert (
+            model._get_asc(TravelMode.CARPOOL_PASSENGER, preferences)
+            == preferences.asc_carpool
+        )
 
     def test_asc_for_transit(self, model, preferences):
         """Transit should have ASC."""
-        assert model._get_asc(TravelMode.TRANSIT, preferences) == preferences.asc_transit
+        assert (
+            model._get_asc(TravelMode.TRANSIT, preferences) == preferences.asc_transit
+        )
 
     def test_asc_for_walk(self, model, preferences):
         """Walk should have ASC."""

@@ -19,6 +19,7 @@ from numpy.typing import NDArray
 
 class TravelMode(Enum):
     """Available travel modes for agents."""
+
     DRIVE_ALONE = auto()
     CARPOOL_DRIVER = auto()
     CARPOOL_PASSENGER = auto()
@@ -30,18 +31,20 @@ class TravelMode(Enum):
 
 class DecisionRule(Enum):
     """Decision-making rules for bounded rationality."""
-    UTILITY_MAX = auto()      # Pure utility maximization
-    SOFTMAX = auto()          # Probabilistic choice ∝ exp(U/τ)
-    EPSILON_GREEDY = auto()   # Explore with probability ε
-    SATISFICING = auto()      # Accept first option above threshold
+
+    UTILITY_MAX = auto()  # Pure utility maximization
+    SOFTMAX = auto()  # Probabilistic choice ∝ exp(U/τ)
+    EPSILON_GREEDY = auto()  # Explore with probability ε
+    SATISFICING = auto()  # Accept first option above threshold
 
 
 @dataclass
 class AgentState:
     """Current state of an agent in the simulation."""
+
     position: tuple[float, float]  # (x, y) coordinates
-    velocity: float = 0.0          # Current speed (m/s)
-    heading: float = 0.0           # Direction (radians)
+    velocity: float = 0.0  # Current speed (m/s)
+    heading: float = 0.0  # Direction (radians)
     mode: TravelMode = TravelMode.DRIVE_ALONE
     route: Optional[list[int]] = None
     departure_time: float = 0.0
@@ -54,13 +57,14 @@ class AgentState:
 @dataclass
 class AgentPreferences:
     """Agent preference parameters for utility computation."""
+
     # Value of time ($/hour)
     vot: float = 25.0
     # Preference weights (β coefficients)
-    beta_time: float = -0.05      # Disutility per minute
-    beta_cost: float = -0.10      # Disutility per dollar
+    beta_time: float = -0.05  # Disutility per minute
+    beta_cost: float = -0.10  # Disutility per dollar
     beta_incentive: float = 0.15  # Utility from incentives
-    beta_comfort: float = 0.02    # Comfort preference
+    beta_comfort: float = 0.02  # Comfort preference
     beta_reliability: float = -0.03  # Disutility of unreliability
     # Mode-specific constants (alternative-specific constants)
     asc_carpool: float = -0.5
@@ -68,20 +72,21 @@ class AgentPreferences:
     asc_walk: float = -2.0
     # Behavioral parameters
     decision_rule: DecisionRule = DecisionRule.SOFTMAX
-    temperature: float = 1.0      # Softmax temperature
-    epsilon: float = 0.1          # Exploration probability
+    temperature: float = 1.0  # Softmax temperature
+    epsilon: float = 0.1  # Exploration probability
     satisficing_threshold: float = 0.0
 
 
 @dataclass
 class TripAttributes:
     """Attributes of a potential trip/action."""
+
     mode: TravelMode
-    travel_time: float           # Expected time (minutes)
-    cost: float                  # Out-of-pocket cost ($)
-    incentive: float = 0.0       # Incentive payment ($)
-    comfort_score: float = 1.0   # Normalized comfort [0, 1]
-    reliability: float = 0.9     # On-time probability
+    travel_time: float  # Expected time (minutes)
+    cost: float  # Out-of-pocket cost ($)
+    incentive: float = 0.0  # Incentive payment ($)
+    comfort_score: float = 1.0  # Normalized comfort [0, 1]
+    reliability: float = 0.9  # On-time probability
 
 
 class BehavioralModel(ABC):
@@ -122,7 +127,10 @@ class LinearUtilityModel(BehavioralModel):
         """Compute deterministic utility component."""
         # Mode-specific constant
         asc = 0.0
-        if trip.mode == TravelMode.CARPOOL_DRIVER or trip.mode == TravelMode.CARPOOL_PASSENGER:
+        if (
+            trip.mode == TravelMode.CARPOOL_DRIVER
+            or trip.mode == TravelMode.CARPOOL_PASSENGER
+        ):
             asc = preferences.asc_carpool
         elif trip.mode == TravelMode.TRANSIT:
             asc = preferences.asc_transit
@@ -149,7 +157,9 @@ class LinearUtilityModel(BehavioralModel):
         if not options:
             raise ValueError("No options available for choice")
 
-        utilities = np.array([self.compute_utility(preferences, opt) for opt in options])
+        utilities = np.array(
+            [self.compute_utility(preferences, opt) for opt in options]
+        )
 
         match preferences.decision_rule:
             case DecisionRule.UTILITY_MAX:
@@ -242,11 +252,13 @@ class BaseAgent(ABC):
 
     def record_history(self, event_type: str, data: dict[str, Any]) -> None:
         """Record an event in agent history."""
-        self.history.append({
-            "event_type": event_type,
-            "timestamp": data.get("timestamp", 0),
-            "data": data,
-        })
+        self.history.append(
+            {
+                "event_type": event_type,
+                "timestamp": data.get("timestamp", 0),
+                "data": data,
+            }
+        )
 
     def get_utility(self, trip: TripAttributes) -> float:
         """Compute utility for a trip option."""
@@ -260,6 +272,7 @@ class BaseAgent(ABC):
 @dataclass
 class PopulationParameters:
     """Parameters for generating agent populations."""
+
     n_agents: int = 1000
 
     # Value of time distribution (lognormal)
@@ -291,28 +304,34 @@ def generate_heterogeneous_preferences(
     """Generate agent preferences from population distributions."""
     # Sample value of time from lognormal
     vot = rng.lognormal(
-        mean=np.log(params.vot_mean) - 0.5 * np.log(1 + (params.vot_std / params.vot_mean)**2),
-        sigma=np.sqrt(np.log(1 + (params.vot_std / params.vot_mean)**2))
+        mean=np.log(params.vot_mean)
+        - 0.5 * np.log(1 + (params.vot_std / params.vot_mean) ** 2),
+        sigma=np.sqrt(np.log(1 + (params.vot_std / params.vot_mean) ** 2)),
     )
 
     # Sample beta coefficients from normal (truncated to reasonable range)
     beta_time = np.clip(
-        rng.normal(params.beta_time_mean, params.beta_time_std),
-        -0.2, 0
+        rng.normal(params.beta_time_mean, params.beta_time_std), -0.2, 0
     )
     beta_cost = np.clip(
-        rng.normal(params.beta_cost_mean, params.beta_cost_std),
-        -0.3, 0
+        rng.normal(params.beta_cost_mean, params.beta_cost_std), -0.3, 0
     )
     beta_incentive = np.clip(
-        rng.normal(params.beta_incentive_mean, params.beta_incentive_std),
-        0, 0.5
+        rng.normal(params.beta_incentive_mean, params.beta_incentive_std), 0, 0.5
     )
 
     # Sample decision rule
-    rule_probs = [params.prob_softmax, params.prob_utility_max, params.prob_epsilon_greedy]
+    rule_probs = [
+        params.prob_softmax,
+        params.prob_utility_max,
+        params.prob_epsilon_greedy,
+    ]
     rule_idx = rng.choice(3, p=rule_probs)
-    decision_rule = [DecisionRule.SOFTMAX, DecisionRule.UTILITY_MAX, DecisionRule.EPSILON_GREEDY][rule_idx]
+    decision_rule = [
+        DecisionRule.SOFTMAX,
+        DecisionRule.UTILITY_MAX,
+        DecisionRule.EPSILON_GREEDY,
+    ][rule_idx]
 
     # Sample temperature for softmax
     temperature = max(0.1, rng.normal(params.temperature_mean, params.temperature_std))

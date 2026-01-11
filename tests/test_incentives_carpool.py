@@ -143,11 +143,7 @@ class TestCarpoolIncentive:
         }
         reward = incentive.compute_reward("agent_001", context)
 
-        expected = (
-            2.50 * 2  # passengers
-            + 1.00  # driver bonus
-            + 0.10 * 10  # distance
-        )
+        expected = 2.50 * 2 + 1.00 + 0.10 * 10  # passengers  # driver bonus  # distance
         assert reward == pytest.approx(expected)
 
     def test_compute_reward_peak_hours(self, incentive):

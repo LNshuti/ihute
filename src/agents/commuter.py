@@ -26,6 +26,7 @@ from .base import (
 @dataclass
 class CommuterProfile:
     """Profile information for a commuter agent."""
+
     home_location: tuple[float, float]
     work_location: tuple[float, float]
     desired_arrival_time: float  # Seconds from midnight
@@ -122,7 +123,7 @@ class CommuterAgent(BaseAgent):
         """Estimate trip attributes for a mode (placeholder)."""
         # Base estimates - would be computed from network in real simulation
         base_time = 30.0  # minutes
-        base_cost = 5.0   # dollars
+        base_cost = 5.0  # dollars
 
         match mode:
             case TravelMode.DRIVE_ALONE:
@@ -188,8 +189,14 @@ class CommuterAgent(BaseAgent):
 
         # Default departure window
         if time_window is None:
-            earliest = desired_arrival - expected_travel_time - self.profile.flexibility_window
-            latest = desired_arrival - expected_travel_time + self.profile.flexibility_window * 0.5
+            earliest = (
+                desired_arrival - expected_travel_time - self.profile.flexibility_window
+            )
+            latest = (
+                desired_arrival
+                - expected_travel_time
+                + self.profile.flexibility_window * 0.5
+            )
             time_window = (max(0, earliest), latest)
 
         # Ideal departure time (to arrive exactly on time)
@@ -215,12 +222,14 @@ class CommuterAgent(BaseAgent):
             # Get incentive at this time
             incentive = incentive_schedule.get(t, 0)
 
-            options.append(TripAttributes(
-                mode=TravelMode.DRIVE_ALONE,
-                travel_time=expected_travel_time / 60,
-                cost=delay_penalty,
-                incentive=incentive,
-            ))
+            options.append(
+                TripAttributes(
+                    mode=TravelMode.DRIVE_ALONE,
+                    travel_time=expected_travel_time / 60,
+                    cost=delay_penalty,
+                    incentive=incentive,
+                )
+            )
 
         # Choose optimal departure time
         choice_idx = self.choose_option(options)
@@ -254,8 +263,7 @@ class CommuterAgent(BaseAgent):
         # Generate route attributes if not provided
         if route_attributes is None:
             route_attributes = [
-                self._estimate_route_attributes(route)
-                for route in available_routes
+                self._estimate_route_attributes(route) for route in available_routes
             ]
 
         # Choose using behavioral model
@@ -371,11 +379,14 @@ class CommuterAgent(BaseAgent):
         self.total_incentives += incentive_earned
         self.mode_history.append(mode)
 
-        self.record_history("trip_completed", {
-            "travel_time": travel_time,
-            "mode": mode.name,
-            "incentive": incentive_earned,
-        })
+        self.record_history(
+            "trip_completed",
+            {
+                "travel_time": travel_time,
+                "mode": mode.name,
+                "incentive": incentive_earned,
+            },
+        )
 
     def get_statistics(self) -> dict[str, Any]:
         """Get summary statistics for this agent."""
@@ -386,7 +397,8 @@ class CommuterAgent(BaseAgent):
             "avg_travel_time": self.total_travel_time / max(1, self.trips_completed),
             "total_incentives": self.total_incentives,
             "mode_distribution": {
-                mode.name: self.mode_history.count(mode) / max(1, len(self.mode_history))
+                mode.name: self.mode_history.count(mode)
+                / max(1, len(self.mode_history))
                 for mode in TravelMode
                 if mode in self.mode_history
             },
@@ -400,7 +412,9 @@ class CommuterAgent(BaseAgent):
 
 def create_commuter_population(
     n_agents: int,
-    home_region: tuple[tuple[float, float], tuple[float, float]],  # ((min_x, min_y), (max_x, max_y))
+    home_region: tuple[
+        tuple[float, float], tuple[float, float]
+    ],  # ((min_x, min_y), (max_x, max_y))
     work_region: tuple[tuple[float, float], tuple[float, float]],
     arrival_time_dist: tuple[float, float] = (8 * 3600, 1800),  # (mean, std)
     rng: Optional[np.random.Generator] = None,

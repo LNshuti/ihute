@@ -357,7 +357,9 @@ class TestPopulationParameters:
     def test_probabilities_sum_to_one(self):
         """Decision rule probabilities should sum to 1."""
         params = PopulationParameters()
-        total = params.prob_softmax + params.prob_utility_max + params.prob_epsilon_greedy
+        total = (
+            params.prob_softmax + params.prob_utility_max + params.prob_epsilon_greedy
+        )
         assert total == pytest.approx(1.0)
 
 

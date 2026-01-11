@@ -24,6 +24,7 @@ from .base import (
 @dataclass
 class PacerSession:
     """Represents a pacer driving session."""
+
     session_id: str
     agent_id: str
     corridor_id: str
@@ -225,7 +226,7 @@ class PacerIncentive(BaseIncentive):
         if len(session.speed_samples) >= 2:
             speeds = np.array(session.speed_samples)
             variance = np.var(speeds)
-            max_variance = session.speed_tolerance ** 2
+            max_variance = session.speed_tolerance**2
             smoothness = max(0, 1 - variance / max_variance)
         else:
             smoothness = 1.0
@@ -267,12 +268,14 @@ class PacerIncentive(BaseIncentive):
         if len(session.speed_samples) >= 2:
             speeds = np.array(session.speed_samples)
             variance = np.var(speeds)
-            max_variance = session.speed_tolerance ** 2
+            max_variance = session.speed_tolerance**2
             session.smoothness_score = max(0, 1 - variance / max_variance)
 
             # Also check adherence to target
             mean_speed = np.mean(speeds)
-            target_adherence = 1 - abs(mean_speed - session.target_speed) / session.target_speed
+            target_adherence = (
+                1 - abs(mean_speed - session.target_speed) / session.target_speed
+            )
             session.smoothness_score = (session.smoothness_score + target_adherence) / 2
 
         # Determine status and reward
@@ -314,14 +317,17 @@ class PacerIncentive(BaseIncentive):
         """Compute total distance from position samples."""
         total = 0.0
         for i in range(1, len(positions)):
-            lat1, lon1 = positions[i-1]
+            lat1, lon1 = positions[i - 1]
             lat2, lon2 = positions[i]
 
             # Haversine formula
             lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
             dlat = lat2 - lat1
             dlon = lon2 - lon1
-            a = np.sin(dlat/2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2)**2
+            a = (
+                np.sin(dlat / 2) ** 2
+                + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
+            )
             c = 2 * np.arcsin(np.sqrt(a))
             r = 3956  # Earth radius in miles
 
@@ -335,7 +341,8 @@ class PacerIncentive(BaseIncentive):
     ) -> dict[str, Any]:
         """Compute aggregate pacer performance for a corridor."""
         corridor_sessions = [
-            s for s in self.sessions
+            s
+            for s in self.sessions
             if s.corridor_id == corridor_id and s.status == "completed"
         ]
 
@@ -362,17 +369,23 @@ class PacerIncentive(BaseIncentive):
         stats = super().get_statistics()
 
         completed = [s for s in self.sessions if s.status == "completed"]
-        successful = [s for s in completed if s.smoothness_score >= self.smoothness_threshold]
+        successful = [
+            s for s in completed if s.smoothness_score >= self.smoothness_threshold
+        ]
 
-        stats.update({
-            "total_sessions": len(self.sessions),
-            "active_sessions": len(self.active_sessions),
-            "completed_sessions": len(completed),
-            "successful_sessions": len(successful),
-            "success_rate": len(successful) / max(1, len(completed)),
-            "total_pacer_miles": sum(s.distance_miles for s in completed),
-            "avg_smoothness": np.mean([s.smoothness_score for s in completed]) if completed else 0,
-            "corridors": list(self.corridor_targets.keys()),
-        })
+        stats.update(
+            {
+                "total_sessions": len(self.sessions),
+                "active_sessions": len(self.active_sessions),
+                "completed_sessions": len(completed),
+                "successful_sessions": len(successful),
+                "success_rate": len(successful) / max(1, len(completed)),
+                "total_pacer_miles": sum(s.distance_miles for s in completed),
+                "avg_smoothness": (
+                    np.mean([s.smoothness_score for s in completed]) if completed else 0
+                ),
+                "corridors": list(self.corridor_targets.keys()),
+            }
+        )
 
         return stats

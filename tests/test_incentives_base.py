@@ -361,7 +361,7 @@ class TestBaseIncentive:
         # Complete one
         incentive.complete_incentive(
             incentive.allocations[0].allocation_id,
-            {"completed": True, "timestamp": 2000}
+            {"completed": True, "timestamp": 2000},
         )
 
         stats = incentive.get_statistics()
@@ -412,7 +412,9 @@ class TestBaseIncentive:
     def test_multiple_allocations(self, incentive):
         """Multiple allocations should be tracked."""
         for i in range(5):
-            incentive.offer_incentive(f"agent_{i:03d}", {"eligible": True, "timestamp": 1000 + i})
+            incentive.offer_incentive(
+                f"agent_{i:03d}", {"eligible": True, "timestamp": 1000 + i}
+            )
 
         assert len(incentive.allocations) == 5
         assert incentive.n_offers == 5

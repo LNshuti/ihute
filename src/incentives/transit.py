@@ -24,6 +24,7 @@ from .base import (
 @dataclass
 class TransitPass:
     """Represents a transit pass or voucher."""
+
     pass_id: str
     agent_id: str
     pass_type: str  # "single", "daily", "weekly", "monthly"
@@ -181,12 +182,14 @@ class TransitIncentive(BaseIncentive):
         if agent_id not in self.agent_history:
             self.agent_history[agent_id] = []
 
-        self.agent_history[agent_id].append({
-            "timestamp": outcome.get("timestamp", 0),
-            "origin": outcome.get("origin"),
-            "destination": outcome.get("destination"),
-            "route": outcome.get("route"),
-        })
+        self.agent_history[agent_id].append(
+            {
+                "timestamp": outcome.get("timestamp", 0),
+                "origin": outcome.get("origin"),
+                "destination": outcome.get("destination"),
+                "route": outcome.get("route"),
+            }
+        )
 
         # Update streak
         # Simplified: increment streak (in real impl, check consecutive days)
@@ -252,9 +255,7 @@ class TransitIncentive(BaseIncentive):
 
     def compute_mode_shift(self) -> dict[str, Any]:
         """Compute aggregate mode shift statistics."""
-        total_transit_trips = sum(
-            len(trips) for trips in self.agent_history.values()
-        )
+        total_transit_trips = sum(len(trips) for trips in self.agent_history.values())
 
         unique_users = len(self.agent_history)
 
@@ -285,11 +286,15 @@ class TransitIncentive(BaseIncentive):
             "total_trips": len(trips),
             "current_streak": streak,
             "has_active_pass": active_pass is not None,
-            "pass_info": {
-                "pass_id": active_pass.pass_id,
-                "trips_remaining": active_pass.trips_remaining,
-                "expiry_date": active_pass.expiry_date,
-            } if active_pass else None,
+            "pass_info": (
+                {
+                    "pass_id": active_pass.pass_id,
+                    "trips_remaining": active_pass.trips_remaining,
+                    "expiry_date": active_pass.expiry_date,
+                }
+                if active_pass
+                else None
+            ),
             "next_reward": self.compute_reward(agent_id, {"hour": 8}),
         }
 

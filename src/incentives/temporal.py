@@ -23,6 +23,7 @@ from .base import (
 @dataclass
 class TimeSlot:
     """Represents a departure time slot with associated incentive."""
+
     slot_id: str
     start_time: float  # Seconds from midnight
     end_time: float
@@ -78,7 +79,7 @@ class DepartureShiftIncentive(BaseIncentive):
 
         # Peak period definition (default AM and PM peaks)
         self.peak_periods = [
-            (7 * 3600, 9 * 3600),   # 7-9 AM
+            (7 * 3600, 9 * 3600),  # 7-9 AM
             (17 * 3600, 19 * 3600),  # 5-7 PM
         ]
 
@@ -216,14 +217,16 @@ class DepartureShiftIncentive(BaseIncentive):
                 break
 
         # Record shift
-        self.shift_records.append({
-            "agent_id": allocation.agent_id,
-            "original_time": original_time,
-            "target_time": target_time,
-            "actual_time": actual_departure,
-            "shift_minutes": shift_minutes,
-            "reward": reward,
-        })
+        self.shift_records.append(
+            {
+                "agent_id": allocation.agent_id,
+                "original_time": original_time,
+                "target_time": target_time,
+                "actual_time": actual_departure,
+                "shift_minutes": shift_minutes,
+                "reward": reward,
+            }
+        )
 
         return True, reward
 
@@ -271,16 +274,24 @@ class DepartureShiftIncentive(BaseIncentive):
             if shift_minutes < self.min_shift_minutes:
                 continue
 
-            reward = self.base_shift_reward + self.reward_per_minute_shift * min(shift_minutes, self.max_shift_minutes)
+            reward = self.base_shift_reward + self.reward_per_minute_shift * min(
+                shift_minutes, self.max_shift_minutes
+            )
             reward += slot.incentive_rate
 
-            options.append({
-                "slot_id": slot.slot_id,
-                "target_time": target,
-                "shift_minutes": shift_minutes,
-                "expected_reward": reward,
-                "slot_capacity_remaining": slot.capacity - slot.current_count if slot.capacity > 0 else float("inf"),
-            })
+            options.append(
+                {
+                    "slot_id": slot.slot_id,
+                    "target_time": target,
+                    "shift_minutes": shift_minutes,
+                    "expected_reward": reward,
+                    "slot_capacity_remaining": (
+                        slot.capacity - slot.current_count
+                        if slot.capacity > 0
+                        else float("inf")
+                    ),
+                }
+            )
 
         # Sort by reward
         options.sort(key=lambda x: x["expected_reward"], reverse=True)
@@ -296,8 +307,10 @@ class DepartureShiftIncentive(BaseIncentive):
 
         # Aggregate by time period
         shifted_from_peak = sum(
-            1 for r in self.shift_records
-            if self.is_peak_time(r["original_time"]) and not self.is_peak_time(r["actual_time"])
+            1
+            for r in self.shift_records
+            if self.is_peak_time(r["original_time"])
+            and not self.is_peak_time(r["actual_time"])
         )
 
         return {
@@ -315,7 +328,9 @@ class DepartureShiftIncentive(BaseIncentive):
         stats.update(self.compute_demand_shift())
         stats["n_time_slots"] = len(self.time_slots)
         stats["slot_utilization"] = {
-            slot.slot_id: slot.current_count / max(1, slot.capacity) if slot.capacity > 0 else 0
+            slot.slot_id: (
+                slot.current_count / max(1, slot.capacity) if slot.capacity > 0 else 0
+            )
             for slot in self.time_slots
         }
         return stats

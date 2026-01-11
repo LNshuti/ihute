@@ -19,6 +19,7 @@ from numpy.typing import NDArray
 
 class IncentiveType(Enum):
     """Types of incentive mechanisms."""
+
     CARPOOL = auto()
     PACER = auto()
     DEPARTURE_SHIFT = auto()
@@ -30,6 +31,7 @@ class IncentiveType(Enum):
 @dataclass
 class IncentiveConfig:
     """Configuration for an incentive mechanism."""
+
     incentive_type: IncentiveType
     enabled: bool = True
 
@@ -38,7 +40,9 @@ class IncentiveConfig:
     budget_per_agent: float = 50.0
 
     # Temporal constraints
-    active_hours: list[int] = field(default_factory=lambda: list(range(6, 10)) + list(range(16, 20)))
+    active_hours: list[int] = field(
+        default_factory=lambda: list(range(6, 10)) + list(range(16, 20))
+    )
     active_days: list[int] = field(default_factory=lambda: [0, 1, 2, 3, 4])  # Mon-Fri
 
     # Spatial constraints
@@ -56,6 +60,7 @@ class IncentiveConfig:
 @dataclass
 class IncentiveAllocation:
     """Record of an incentive allocation to an agent."""
+
     allocation_id: str
     agent_id: str
     incentive_type: IncentiveType
@@ -74,6 +79,7 @@ class IncentiveAllocation:
 @dataclass
 class IncentiveResult:
     """Result from processing an incentive."""
+
     success: bool
     allocation: Optional[IncentiveAllocation]
     message: str
@@ -310,8 +316,7 @@ class BaseIncentive(ABC):
     def is_active_time(self, hour: int, day_of_week: int) -> bool:
         """Check if incentive is active at this time."""
         return (
-            hour in self.config.active_hours
-            and day_of_week in self.config.active_days
+            hour in self.config.active_hours and day_of_week in self.config.active_days
         )
 
     def get_statistics(self) -> dict[str, Any]:

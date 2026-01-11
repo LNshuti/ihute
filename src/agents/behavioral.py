@@ -64,9 +64,9 @@ class LogitModel(BehavioralModel):
         options: list[TripAttributes],
     ) -> NDArray:
         """Compute logit choice probabilities."""
-        utilities = np.array([
-            self.compute_utility(preferences, opt) for opt in options
-        ])
+        utilities = np.array(
+            [self.compute_utility(preferences, opt) for opt in options]
+        )
 
         # Scale utilities
         scaled = utilities / self.scale
@@ -142,13 +142,9 @@ class MixedLogitModel(BehavioralModel):
                 case "lognormal":
                     # Ensure negative coefficients for costs
                     sign = -1 if mean < 0 else 1
-                    coeffs[name] = sign * rng.lognormal(
-                        np.log(abs(mean)), std
-                    )
+                    coeffs[name] = sign * rng.lognormal(np.log(abs(mean)), std)
                 case "triangular":
-                    coeffs[name] = rng.triangular(
-                        mean - std, mean, mean + std
-                    )
+                    coeffs[name] = rng.triangular(mean - std, mean, mean + std)
                 case _:
                     coeffs[name] = mean
 
@@ -187,10 +183,12 @@ class MixedLogitModel(BehavioralModel):
         for _ in range(self.n_draws):
             coeffs = self._draw_coefficients(rng)
 
-            utilities = np.array([
-                self._compute_utility_with_coeffs(opt, coeffs, preferences)
-                for opt in options
-            ])
+            utilities = np.array(
+                [
+                    self._compute_utility_with_coeffs(opt, coeffs, preferences)
+                    for opt in options
+                ]
+            )
 
             # Logit probabilities for this draw
             scaled = utilities - utilities.max()
@@ -249,7 +247,7 @@ class ProspectTheoryModel(BehavioralModel):
         v(x) = -λ(-x)^α   if x < 0 (losses)
         """
         if x >= 0:
-            return x ** self.alpha
+            return x**self.alpha
         else:
             return -self.loss_aversion * ((-x) ** self.alpha)
 
@@ -280,14 +278,20 @@ class ProspectTheoryModel(BehavioralModel):
             )
 
         # Compute gains/losses relative to reference
-        time_diff = self.reference_point.travel_time - trip.travel_time  # Less time = gain
+        time_diff = (
+            self.reference_point.travel_time - trip.travel_time
+        )  # Less time = gain
         cost_diff = self.reference_point.cost - trip.cost  # Less cost = gain
-        incentive_diff = trip.incentive - self.reference_point.incentive  # More incentive = gain
+        incentive_diff = (
+            trip.incentive - self.reference_point.incentive
+        )  # More incentive = gain
 
         # Apply value function to each dimension
         time_value = self.value_function(time_diff * abs(preferences.beta_time))
         cost_value = self.value_function(cost_diff * abs(preferences.beta_cost))
-        incentive_value = self.value_function(incentive_diff * preferences.beta_incentive)
+        incentive_value = self.value_function(
+            incentive_diff * preferences.beta_incentive
+        )
 
         return time_value + cost_value + incentive_value
 
@@ -298,9 +302,7 @@ class ProspectTheoryModel(BehavioralModel):
         rng: np.random.Generator,
     ) -> int:
         """Choose based on prospect theory values."""
-        values = np.array([
-            self.compute_utility(preferences, opt) for opt in options
-        ])
+        values = np.array([self.compute_utility(preferences, opt) for opt in options])
 
         # Softmax choice based on values
         scaled = (values - values.max()) / preferences.temperature
@@ -401,10 +403,9 @@ class RegretMinimizationModel(BehavioralModel):
         options: list[TripAttributes],
     ) -> NDArray:
         """Compute choice probabilities based on regret."""
-        regrets = np.array([
-            self.compute_regret(opt, options, preferences)
-            for opt in options
-        ])
+        regrets = np.array(
+            [self.compute_regret(opt, options, preferences) for opt in options]
+        )
 
         # Lower regret = higher probability (negative regret in exp)
         scaled = -regrets
@@ -427,6 +428,7 @@ class RegretMinimizationModel(BehavioralModel):
 @dataclass
 class IncentiveElasticity:
     """Computed elasticity of behavior with respect to incentive changes."""
+
     base_participation_rate: float
     elasticity: float  # % change in participation per % change in incentive
     confidence_interval: tuple[float, float]
@@ -519,7 +521,7 @@ def estimate_incentive_elasticity(
 
         # Rough confidence interval
         residuals = log_rates - (y_mean + elasticity * (log_incentives - x_mean))
-        se = np.sqrt((residuals ** 2).sum() / (n - 2)) / np.sqrt(denominator)
+        se = np.sqrt((residuals**2).sum() / (n - 2)) / np.sqrt(denominator)
         ci = (elasticity - 1.96 * se, elasticity + 1.96 * se)
 
     return IncentiveElasticity(

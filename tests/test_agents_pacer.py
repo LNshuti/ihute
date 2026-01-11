@@ -102,7 +102,11 @@ class TestPacerAgent:
 
     def test_decide_mode_prefers_drive_alone(self, agent):
         """Pacer should prefer drive alone."""
-        modes = [TravelMode.TRANSIT, TravelMode.DRIVE_ALONE, TravelMode.CARPOOL_PASSENGER]
+        modes = [
+            TravelMode.TRANSIT,
+            TravelMode.DRIVE_ALONE,
+            TravelMode.CARPOOL_PASSENGER,
+        ]
         mode = agent.decide_mode(modes)
         assert mode == TravelMode.DRIVE_ALONE
 

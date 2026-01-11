@@ -138,7 +138,10 @@ class TestCommuterAgent:
 
         # Should not choose DRIVE_ALONE without a car
         # It filters to available modes first
-        assert mode in [TravelMode.TRANSIT, TravelMode.DRIVE_ALONE]  # Falls back if needed
+        assert mode in [
+            TravelMode.TRANSIT,
+            TravelMode.DRIVE_ALONE,
+        ]  # Falls back if needed
 
     def test_mode_available_drive_with_car(self, agent):
         """Agent with car can drive."""

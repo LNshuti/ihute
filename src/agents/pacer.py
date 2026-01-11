@@ -24,6 +24,7 @@ from .base import (
 @dataclass
 class PacerProfile:
     """Profile information for a pacer driver agent."""
+
     home_location: tuple[float, float]
     work_location: tuple[float, float]
     desired_arrival_time: float  # Seconds from midnight
@@ -40,6 +41,7 @@ class PacerProfile:
 @dataclass
 class PacerPerformance:
     """Performance metrics for a pacer driver."""
+
     trips_as_pacer: int = 0
     total_pacer_miles: float = 0.0
     total_pacer_earnings: float = 0.0
@@ -109,8 +111,14 @@ class PacerAgent(BaseAgent):
             desired_arrival = self.profile.desired_arrival_time
 
         if time_window is None:
-            earliest = desired_arrival - expected_travel_time - self.profile.flexibility_window
-            latest = desired_arrival - expected_travel_time + self.profile.flexibility_window * 0.5
+            earliest = (
+                desired_arrival - expected_travel_time - self.profile.flexibility_window
+            )
+            latest = (
+                desired_arrival
+                - expected_travel_time
+                + self.profile.flexibility_window * 0.5
+            )
             time_window = (max(0, earliest), latest)
 
         ideal_departure = desired_arrival - expected_travel_time
@@ -202,8 +210,7 @@ class PacerAgent(BaseAgent):
 
         # Participation utility
         participation_utility = (
-            self.preferences.beta_incentive * expected_reward
-            - constraint_cost
+            self.preferences.beta_incentive * expected_reward - constraint_cost
         )
 
         # Make probabilistic decision
@@ -223,10 +230,13 @@ class PacerAgent(BaseAgent):
         self.current_target_speed = target_speed
         self.speed_history = []
 
-        self.record_history("pacing_started", {
-            "target_speed": target_speed,
-            "corridor_id": corridor_id,
-        })
+        self.record_history(
+            "pacing_started",
+            {
+                "target_speed": target_speed,
+                "corridor_id": corridor_id,
+            },
+        )
 
     def update_speed(self, current_speed: float, timestamp: float) -> float:
         """
@@ -273,8 +283,8 @@ class PacerAgent(BaseAgent):
         self.performance.speed_variance_history.append(speed_variance)
         n = len(self.performance.speed_variance_history)
         self.performance.avg_smoothness_score = (
-            (self.performance.avg_smoothness_score * (n - 1) + smoothness) / n
-        )
+            self.performance.avg_smoothness_score * (n - 1) + smoothness
+        ) / n
 
         self.is_pacing = False
         self.current_target_speed = None
@@ -301,10 +311,13 @@ class PacerAgent(BaseAgent):
         self.performance.total_pacer_earnings += amount
         self.state.incentives_earned += amount
 
-        self.record_history("pacer_payment", {
-            "amount": amount,
-            "distance_miles": distance_miles,
-        })
+        self.record_history(
+            "pacer_payment",
+            {
+                "amount": amount,
+                "distance_miles": distance_miles,
+            },
+        )
 
     def get_statistics(self) -> dict[str, Any]:
         """Get summary statistics for this pacer agent."""
@@ -315,8 +328,8 @@ class PacerAgent(BaseAgent):
             "total_pacer_earnings": self.performance.total_pacer_earnings,
             "avg_smoothness_score": self.performance.avg_smoothness_score,
             "earnings_per_mile": (
-                self.performance.total_pacer_earnings /
-                max(1, self.performance.total_pacer_miles)
+                self.performance.total_pacer_earnings
+                / max(1, self.performance.total_pacer_miles)
             ),
             "enrolled_corridors": self.profile.enrolled_corridors,
             "driving_skill": self.profile.driving_skill,

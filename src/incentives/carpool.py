@@ -23,6 +23,7 @@ from .base import (
 @dataclass
 class CarpoolMatch:
     """Represents a carpool match between travelers."""
+
     match_id: str
     driver_id: str
     passenger_ids: list[str]
@@ -234,17 +235,21 @@ class CarpoolIncentive(BaseIncentive):
                 continue
 
             # Compute match score (higher is better)
-            score = 1.0 - (origin_time + dest_time + time_diff) / (2 * max_detour_minutes + max_wait_minutes)
+            score = 1.0 - (origin_time + dest_time + time_diff) / (
+                2 * max_detour_minutes + max_wait_minutes
+            )
 
-            matches.append({
-                "agent_id": other["agent_id"],
-                "origin": other["origin"],
-                "destination": other["destination"],
-                "departure_time": other["departure_time"],
-                "detour_minutes": origin_time + dest_time,
-                "wait_minutes": time_diff,
-                "score": score,
-            })
+            matches.append(
+                {
+                    "agent_id": other["agent_id"],
+                    "origin": other["origin"],
+                    "destination": other["destination"],
+                    "departure_time": other["departure_time"],
+                    "detour_minutes": origin_time + dest_time,
+                    "wait_minutes": time_diff,
+                    "score": score,
+                }
+            )
 
         # Sort by score
         matches.sort(key=lambda x: x["score"], reverse=True)
@@ -263,7 +268,7 @@ class CarpoolIncentive(BaseIncentive):
         dlat = lat2 - lat1
         dlon = lon2 - lon1
 
-        a = np.sin(dlat/2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2)**2
+        a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
         c = 2 * np.arcsin(np.sqrt(a))
 
         # Earth radius in miles
@@ -340,15 +345,18 @@ class CarpoolIncentive(BaseIncentive):
 
         completed_matches = [m for m in self.matches if m.status == "completed"]
 
-        stats.update({
-            "total_matches": len(self.matches),
-            "completed_matches": len(completed_matches),
-            "active_drivers": len(self.active_drivers),
-            "active_passengers": len(self.active_passengers),
-            "avg_passengers_per_match": (
-                np.mean([len(m.passenger_ids) for m in completed_matches])
-                if completed_matches else 0
-            ),
-        })
+        stats.update(
+            {
+                "total_matches": len(self.matches),
+                "completed_matches": len(completed_matches),
+                "active_drivers": len(self.active_drivers),
+                "active_passengers": len(self.active_passengers),
+                "avg_passengers_per_match": (
+                    np.mean([len(m.passenger_ids) for m in completed_matches])
+                    if completed_matches
+                    else 0
+                ),
+            }
+        )
 
         return stats
