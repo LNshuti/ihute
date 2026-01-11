@@ -28,6 +28,22 @@ cd dbt && dbt run --select staging    # Run specific layer
 cd app && python app.py               # Run Gradio dashboard locally
 ```
 
+### Gradio Deployment
+```bash
+# Local development with auto-reload
+cd app && gradio app.py
+
+# Deploy to Hugging Face Spaces
+# 1. Create a new Space at huggingface.co/new-space (select Gradio SDK)
+# 2. Push the app/ directory contents to the Space repo
+# 3. Ensure requirements.txt includes: gradio, plotly, duckdb, pandas
+
+# Required files for HF Spaces deployment:
+# - app.py (main application)
+# - requirements.txt (dependencies)
+# - warehouse.duckdb (database file, or configure remote connection)
+```
+
 ## Architecture
 
 ### Three-Layer Design
