@@ -120,7 +120,7 @@ cd app && gradio app.py
 
 ## Dashboard (`app/`)
 
-**Live Demo**: https://huggingface.co/spaces/LeonceNsh/nashville-incentive-simulation
+**Live Demo**: https://huggingface.co/spaces/LeonceNsh/ihute
 
 - `app.py` - Main Gradio application
 - `database.py` - DuckDB connection and query execution

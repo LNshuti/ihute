@@ -417,7 +417,7 @@ cd app && gradio app.py
    git add . && git commit -m "Deploy dashboard" && git push
    ```
 
-**Live Demo:** https://huggingface.co/spaces/LeonceNsh/nashville-incentive-simulation
+**Live Demo:** https://huggingface.co/spaces/LeonceNsh/ihute
 
 ## References
 
