@@ -1,0 +1,6 @@
+simulation_run_id,scenario_name,started_at,completed_at,config
+RUN001,baseline,2024-03-15 06:00:00,2024-03-15 06:45:00,"{""budget"": 0, ""incentive_enabled"": false}"
+RUN002,carpool_incentive,2024-03-15 07:00:00,2024-03-15 07:48:00,"{""budget"": 10000, ""incentive_type"": ""CARPOOL""}"
+RUN003,pacer_program,2024-03-15 08:00:00,2024-03-15 08:52:00,"{""budget"": 15000, ""incentive_type"": ""PACER""}"
+RUN004,transit_promo,2024-03-15 09:00:00,2024-03-15 09:40:00,"{""budget"": 8000, ""incentive_type"": ""TRANSIT""}"
+RUN005,combined,2024-03-15 10:00:00,2024-03-15 10:55:00,"{""budget"": 25000, ""incentive_types"": [""CARPOOL"",""PACER""]}"

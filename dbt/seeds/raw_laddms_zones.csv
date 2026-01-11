@@ -1,0 +1,5 @@
+zone_id,zone_name,lat_min,lat_max,lon_min,lon_max,mile_marker_start,mile_marker_end
+Z001,Antioch,36.05,36.10,-86.70,-86.65,52.0,55.0
+Z002,La Vergne,36.10,36.14,-86.80,-86.70,48.0,52.0
+Z003,Smyrna,36.14,36.18,-86.85,-86.80,44.0,48.0
+Z004,Murfreesboro,36.18,36.22,-86.90,-86.85,40.0,44.0

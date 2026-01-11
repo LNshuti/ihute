@@ -1,0 +1,18 @@
+# dbt artifacts
+target/
+dbt_packages/
+dbt_modules/
+logs/
+
+# Lock files
+package-lock.yml
+
+# User config
+.user.yml
+
+# Don't commit local profiles (use env vars in CI)
+# profiles.yml
+
+# DuckDB files
+*.duckdb
+*.wal

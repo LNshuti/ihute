@@ -1,0 +1,367 @@
+// IHUTE Nashville Transportation Simulation
+// Database Schema (DBML)
+// Generated: 2026-01-10
+
+Project ihute {
+  database_type: 'DuckDB'
+  Note: '''
+    Agent-based simulation for I-24 corridor incentive mechanisms.
+    Combines Hytch rideshare data, LADDMS trajectories, and simulation outputs.
+  '''
+}
+
+// ==========================================
+// STAGING LAYER - Hytch Rideshare Data
+// ==========================================
+
+Table stg_hytch__trips {
+  trip_id varchar [pk, note: 'Unique trip identifier']
+  trip_started_at timestamp [not null, note: 'Trip start timestamp']
+  trip_date date [note: 'Date of trip']
+  trip_hour timestamp [note: 'Hour bucket']
+  hour_of_day int [note: '0-23']
+  day_of_week int [note: '0=Sunday, 6=Saturday']
+  month_of_year int
+  year int
+  time_period varchar [note: 'AM_PEAK, PM_PEAK, OFF_PEAK']
+  is_weekday boolean
+  origin_latitude decimal [not null]
+  origin_longitude decimal [not null]
+  destination_latitude decimal [not null]
+  destination_longitude decimal [not null]
+  distance_miles decimal [not null]
+  duration_minutes decimal [not null]
+  avg_speed_mph decimal
+  participant_count int [not null]
+  is_carpool boolean [not null]
+  incentive_amount_usd decimal
+  incentive_per_mile decimal
+  incentive_per_participant decimal
+  origin_on_i24 boolean
+  destination_on_i24 boolean
+  _loaded_at timestamp
+
+  indexes {
+    trip_started_at
+    (hour_of_day, day_of_week)
+  }
+}
+
+Table stg_hytch__participants {
+  participant_id varchar [pk, note: 'Unique participant identifier']
+  trip_id varchar [not null, ref: > stg_hytch__trips.trip_id]
+  participant_role varchar [not null, note: 'DRIVER or PASSENGER']
+  user_id varchar
+  _loaded_at timestamp
+}
+
+// ==========================================
+// STAGING LAYER - LADDMS Trajectory Data
+// ==========================================
+
+Table stg_laddms__trajectories {
+  trajectory_id varchar [pk, note: 'Surrogate key from object_id + timestamp']
+  object_id varchar [not null, note: 'Vehicle identifier']
+  location_id varchar [not null, note: 'Sensor location']
+  classification varchar [note: 'VEHICLE, TRUCK, etc.']
+  sub_classification varchar
+  vehicle_length_m decimal
+  vehicle_width_m decimal
+  vehicle_height_m decimal
+  confidence_score decimal
+  timestamp_sec bigint [not null]
+  recorded_at timestamp
+  x_coord decimal [not null]
+  y_coord decimal [not null]
+  latitude decimal
+  longitude decimal
+  speed_mps decimal
+  speed_mph decimal
+  heading_degrees decimal
+  point_sequence int
+  _loaded_at timestamp
+
+  indexes {
+    object_id
+    timestamp_sec
+    location_id
+  }
+}
+
+Table stg_laddms__trajectory_counts {
+  count_id varchar [pk]
+  recorded_at timestamp [not null]
+  hour_bucket timestamp
+  hour_of_day int
+  location_id varchar [not null]
+  vehicle_count int [not null]
+  _loaded_at timestamp
+}
+
+Table stg_laddms__zones {
+  zone_id varchar [pk]
+  zone_name varchar [not null]
+  lat_min decimal
+  lat_max decimal
+  lon_min decimal
+  lon_max decimal
+  centroid_lat decimal
+  centroid_lon decimal
+  area_sqm decimal
+  corridor_id varchar
+  mile_marker_start decimal
+  mile_marker_end decimal
+  _loaded_at timestamp
+}
+
+Table stg_laddms__pet {
+  pet_id varchar [pk, note: 'Post-Encroachment Time record']
+  object_id_1 varchar [not null]
+  object_id_2 varchar [not null]
+  vehicle_id_low varchar
+  vehicle_id_high varchar
+  recorded_at timestamp [not null]
+  hour_bucket timestamp
+  hour_of_day int
+  pet_seconds decimal [not null, note: 'Time between vehicles']
+  pet_severity varchar [note: 'CRITICAL, SEVERE, MODERATE, MILD, SAFE']
+  interaction_type varchar
+  _loaded_at timestamp
+}
+
+// ==========================================
+// STAGING LAYER - Simulation Data
+// ==========================================
+
+Table stg_sim__runs {
+  simulation_run_id varchar [pk]
+  scenario_name varchar [not null]
+  run_name varchar
+  started_at timestamp [not null]
+  completed_at timestamp
+  duration_seconds decimal
+  run_status varchar [note: 'COMPLETED, RUNNING, PENDING']
+  config_json json
+  n_agents int
+  duration_hours decimal
+  primary_incentive_type varchar
+  budget_usd decimal
+  random_seed int
+  is_baseline boolean
+  scenario_type varchar [note: 'CARPOOL, PACER, TRANSIT, DEPARTURE_SHIFT, MIXED']
+  _loaded_at timestamp
+}
+
+Table stg_sim__agent_decisions {
+  decision_id varchar [pk]
+  agent_id varchar [not null]
+  simulation_run_id varchar [not null, ref: > stg_sim__runs.simulation_run_id]
+  decided_at timestamp
+  hour_of_day int
+  decision_type varchar [not null, note: 'MODE_CHOICE, ROUTE_CHOICE, DEPARTURE_TIME, INCENTIVE_RESPONSE']
+  chosen_option varchar [not null]
+  utility_value decimal
+  chosen_mode varchar
+  chosen_route varchar
+  chosen_departure_time decimal
+  accepted_incentive boolean
+  _loaded_at timestamp
+}
+
+Table stg_sim__incentive_events {
+  event_id varchar [pk]
+  agent_id varchar [not null]
+  simulation_run_id varchar [not null, ref: > stg_sim__runs.simulation_run_id]
+  allocation_id varchar
+  event_at timestamp
+  event_hour timestamp
+  hour_of_day int
+  incentive_type varchar [not null, note: 'CARPOOL, PACER, DEPARTURE_SHIFT, TRANSIT']
+  event_type varchar [not null, note: 'OFFER, ACCEPT, REJECT, COMPLETE, EXPIRE, CANCEL']
+  amount_usd decimal
+  is_offer boolean
+  is_accept boolean
+  is_reject boolean
+  is_complete boolean
+  is_expire boolean
+  is_cancel boolean
+  is_successful boolean
+  event_conditions json
+  performance_metrics json
+  _loaded_at timestamp
+}
+
+Table stg_sim__metrics_timeseries {
+  metric_id varchar [pk]
+  simulation_run_id varchar [not null, ref: > stg_sim__runs.simulation_run_id]
+  recorded_at timestamp
+  hour_bucket timestamp
+  hour_of_day int
+  metric_name varchar [not null]
+  metric_value decimal [not null]
+  metric_category varchar
+  _loaded_at timestamp
+}
+
+// ==========================================
+// INTERMEDIATE LAYER
+// ==========================================
+
+Table int_trip_features {
+  trip_id varchar [pk, ref: - stg_hytch__trips.trip_id]
+  Note: 'Feature-engineered Hytch data with cyclical encoding, buckets, and interactions'
+}
+
+Table int_trajectory_speeds {
+  trajectory_id varchar [pk, ref: - stg_laddms__trajectories.trajectory_id]
+  Note: 'Speed and smoothness metrics for trajectories'
+}
+
+Table int_corridor_congestion {
+  Note: 'Hourly corridor-level congestion aggregations'
+}
+
+Table int_incentive_outcomes {
+  allocation_id varchar [pk]
+  Note: 'Incentive lifecycle with outcome tracking'
+}
+
+Table int_simulation_scenarios {
+  simulation_run_id varchar [pk, ref: - stg_sim__runs.simulation_run_id]
+  Note: 'Scenario comparison with baseline metrics'
+}
+
+// ==========================================
+// MARTS LAYER - Dimensions
+// ==========================================
+
+Table dim_time_periods {
+  time_period_id varchar [pk]
+  hour_of_day int [not null]
+  day_of_week int [not null]
+  day_name varchar
+  is_weekday boolean
+  time_period varchar [note: 'AM_PEAK, PM_PEAK, OFF_PEAK']
+  is_peak boolean
+  period_label varchar
+}
+
+Table dim_incentive_types {
+  incentive_type_id varchar [pk]
+  incentive_type varchar [not null]
+  incentive_description varchar
+  typical_amount_min decimal
+  typical_amount_max decimal
+  target_behavior varchar
+}
+
+Table dim_corridors {
+  corridor_id varchar [pk]
+  corridor_name varchar [not null]
+  mile_marker_start decimal
+  mile_marker_end decimal
+  corridor_length_miles decimal
+  lat_min decimal
+  lat_max decimal
+  lon_min decimal
+  lon_max decimal
+}
+
+// ==========================================
+// MARTS LAYER - Facts
+// ==========================================
+
+Table fct_corridor_flows {
+  flow_id varchar [pk]
+  corridor_id varchar [ref: > dim_corridors.corridor_id]
+  time_period_id varchar [ref: > dim_time_periods.time_period_id]
+  recorded_at timestamp
+  vehicle_count int
+  avg_speed_mph decimal
+  congestion_index decimal
+  level_of_service varchar [note: 'A-F scale']
+}
+
+Table fct_mode_choices {
+  choice_id varchar [pk]
+  trip_id varchar
+  time_period_id varchar [ref: > dim_time_periods.time_period_id]
+  is_carpool boolean
+  participant_count int
+  incentive_amount_usd decimal
+  distance_miles decimal
+}
+
+Table fct_incentive_events {
+  event_id varchar [pk]
+  incentive_type_id varchar [ref: > dim_incentive_types.incentive_type_id]
+  simulation_run_id varchar [ref: > stg_sim__runs.simulation_run_id]
+  agent_id varchar
+  event_type varchar
+  amount_usd decimal
+  event_at timestamp
+  is_successful boolean
+}
+
+Table fct_simulation_runs {
+  run_id varchar [pk]
+  scenario_name varchar
+  is_baseline boolean
+  total_budget decimal
+  total_spent decimal
+  avg_speed_improvement decimal
+  vmt_reduction_pct decimal
+  acceptance_rate decimal
+  completion_rate decimal
+}
+
+// ==========================================
+// MARTS LAYER - Metrics
+// ==========================================
+
+Table metrics_congestion {
+  metric_id varchar [pk]
+  corridor_id varchar [ref: > dim_corridors.corridor_id]
+  time_period varchar
+  date date
+  congestion_index decimal
+  reliability_index decimal
+  buffer_time_index decimal
+  planning_time_index decimal
+}
+
+Table metrics_incentive_effectiveness {
+  metric_id varchar [pk]
+  incentive_type varchar
+  scenario_name varchar
+  total_offers int
+  total_accepts int
+  total_completions int
+  acceptance_rate decimal
+  completion_rate decimal
+  total_amount_paid decimal
+  cost_per_trip_reduced decimal
+  roi decimal
+}
+
+Table metrics_elasticity {
+  metric_id varchar [pk]
+  feature_name varchar
+  elasticity_coefficient decimal
+  std_error decimal
+  p_value decimal
+  sample_size int
+  r_squared decimal
+}
+
+Table metrics_scenario_comparison {
+  comparison_id varchar [pk]
+  scenario_name varchar
+  baseline_scenario varchar
+  speed_improvement_pct decimal
+  vmt_change_pct decimal
+  occupancy_change_pct decimal
+  total_cost decimal
+  cost_per_vmt_reduced decimal
+  cost_effectiveness_rank int
+}
