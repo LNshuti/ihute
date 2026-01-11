@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: int_trajectory_speeds
+    description: "Trajectory data with computed speeds and smoothness metrics"
+
+  - name: int_corridor_congestion
+    description: "Congestion metrics aggregated by corridor segment and time"
+
+  - name: int_trip_features
+    description: "Feature-engineered trip data for behavioral modeling"
+
+  - name: int_incentive_outcomes
+    description: "Incentive lifecycle with outcome tracking"
+
+  - name: int_simulation_scenarios
+    description: "Scenario comparison with baseline metrics"

@@ -5,7 +5,7 @@ Real-time metrics KPI component.
 import pandas as pd
 import plotly.graph_objects as go
 
-from ..database import query
+from database import query
 
 
 def get_kpi_data() -> dict:

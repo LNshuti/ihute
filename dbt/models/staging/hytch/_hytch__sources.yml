@@ -1,0 +1,46 @@
+version: 2
+
+sources:
+  - name: hytch
+    description: "Hytch rideshare trip data for behavioral model calibration"
+    schema: main
+    tables:
+      - name: trips
+        identifier: raw_hytch_trips
+        description: "Core trip records from Hytch rideshare platform"
+        columns:
+          - name: trip_id
+            description: "Unique trip identifier"
+          - name: timestamp
+            description: "Trip start timestamp"
+          - name: origin_lat
+            description: "Origin latitude"
+          - name: origin_lng
+            description: "Origin longitude"
+          - name: dest_lat
+            description: "Destination latitude"
+          - name: dest_lng
+            description: "Destination longitude"
+          - name: distance_miles
+            description: "Trip distance in miles"
+          - name: duration_minutes
+            description: "Trip duration in minutes"
+          - name: n_participants
+            description: "Number of participants in rideshare"
+          - name: incentive_amount
+            description: "Incentive paid for this trip"
+          - name: is_carpool
+            description: "Whether trip was a carpool"
+
+      - name: participants
+        identifier: raw_hytch_participants
+        description: "Individual participant records for each trip"
+        columns:
+          - name: participant_id
+            description: "Unique participant identifier"
+          - name: trip_id
+            description: "Associated trip"
+          - name: role
+            description: "Driver or passenger"
+          - name: user_id
+            description: "User account identifier"

@@ -160,14 +160,7 @@ def create_map_tab():
 
 def create_app():
     """Create the main Gradio application."""
-    with gr.Blocks(
-        title="Nashville Incentive Simulation Dashboard",
-        theme=gr.themes.Soft(),
-        css="""
-        .gradio-container { max-width: 1400px; margin: auto; }
-        .tab-nav button { font-size: 16px; }
-        """
-    ) as app:
+    with gr.Blocks(title="Nashville Incentive Simulation Dashboard") as app:
         gr.Markdown(
             """
             # Nashville Transportation Incentive Simulation
@@ -209,8 +202,10 @@ def create_app():
     return app
 
 
-# Main entry point
-app = create_app()
-
+# Main entry point - defer creation until runtime
 if __name__ == "__main__":
-    app.launch()
+    app = create_app()
+    app.launch(
+        server_name="0.0.0.0",
+        share=False
+    )

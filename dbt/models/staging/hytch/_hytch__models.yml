@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: stg_hytch__trips
+    description: "Staged Hytch trip data with standardized fields"
+    columns:
+      - name: trip_id
+        description: "Unique trip identifier"
+        tests:
+          - unique
+          - not_null
+      - name: trip_started_at
+        description: "Trip start timestamp"
+        tests:
+          - not_null
+      - name: origin_latitude
+        description: "Origin latitude"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 35.5
+              max_value: 36.5
+      - name: origin_longitude
+        description: "Origin longitude"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -87.5
+              max_value: -86.0
+      - name: destination_latitude
+        description: "Destination latitude"
+        tests:
+          - not_null
+      - name: destination_longitude
+        description: "Destination longitude"
+        tests:
+          - not_null
+      - name: distance_miles
+        description: "Trip distance"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+      - name: duration_minutes
+        description: "Trip duration"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 300
+      - name: participant_count
+        description: "Number of participants"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 1
+              max_value: 10
+      - name: incentive_amount_usd
+        description: "Incentive amount in USD"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 50
+      - name: is_carpool
+        description: "Carpool indicator"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [true, false]
+
+  - name: stg_hytch__participants
+    description: "Staged participant records"
+    columns:
+      - name: participant_id
+        description: "Unique participant identifier"
+        tests:
+          - unique
+          - not_null
+      - name: trip_id
+        description: "Associated trip"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_hytch__trips')
+              field: trip_id
+      - name: participant_role
+        description: "Driver or passenger"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['DRIVER', 'PASSENGER']

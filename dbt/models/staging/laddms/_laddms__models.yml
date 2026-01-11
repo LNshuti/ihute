@@ -1,0 +1,114 @@
+version: 2
+
+models:
+  - name: stg_laddms__trajectories
+    description: "Staged trajectory data with flattened position/speed records"
+    columns:
+      - name: trajectory_id
+        description: "Surrogate key for trajectory record"
+        tests:
+          - unique
+          - not_null
+      - name: object_id
+        description: "Vehicle identifier from source"
+        tests:
+          - not_null
+      - name: location_id
+        description: "Sensor location identifier"
+        tests:
+          - not_null
+      - name: classification
+        description: "Vehicle classification"
+      - name: timestamp_sec
+        description: "Timestamp in seconds from epoch"
+        tests:
+          - not_null
+      - name: x_coord
+        description: "X coordinate (local reference frame)"
+        tests:
+          - not_null
+      - name: y_coord
+        description: "Y coordinate (local reference frame)"
+        tests:
+          - not_null
+      - name: latitude
+        description: "Latitude (WGS84)"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 36.0
+              max_value: 36.3
+      - name: longitude
+        description: "Longitude (WGS84)"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: -87.0
+              max_value: -86.5
+      - name: speed_mps
+        description: "Speed in meters per second"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 50
+
+  - name: stg_laddms__trajectory_counts
+    description: "Staged trajectory count aggregations"
+    columns:
+      - name: count_id
+        description: "Surrogate key"
+        tests:
+          - unique
+          - not_null
+      - name: recorded_at
+        description: "Timestamp of observation"
+        tests:
+          - not_null
+      - name: location_id
+        description: "Sensor location"
+        tests:
+          - not_null
+      - name: vehicle_count
+        description: "Number of vehicles"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 10000
+
+  - name: stg_laddms__zones
+    description: "Staged zone definitions"
+    columns:
+      - name: zone_id
+        description: "Zone identifier"
+        tests:
+          - unique
+          - not_null
+      - name: zone_name
+        description: "Zone name"
+      - name: centroid_lat
+        description: "Zone centroid latitude"
+      - name: centroid_lon
+        description: "Zone centroid longitude"
+
+  - name: stg_laddms__pet
+    description: "Staged Post-Encroachment Time metrics"
+    columns:
+      - name: pet_id
+        description: "Surrogate key"
+        tests:
+          - unique
+          - not_null
+      - name: object_id_1
+        description: "First vehicle"
+        tests:
+          - not_null
+      - name: object_id_2
+        description: "Second vehicle"
+        tests:
+          - not_null
+      - name: pet_seconds
+        description: "PET value in seconds"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 30

@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from ..database import query
+from database import query
 
 
 def get_speed_heatmap_data() -> pd.DataFrame:
@@ -16,7 +16,7 @@ def get_speed_heatmap_data() -> pd.DataFrame:
         extract(hour from hour_bucket) as hour,
         extract(dow from hour_bucket) as day_of_week,
         avg(avg_speed_mph) as avg_speed
-    FROM marts.fct_corridor_flows
+    FROM main_marts.fct_corridor_flows
     GROUP BY 1, 2
     ORDER BY 2, 1
     """
@@ -60,7 +60,7 @@ def get_hourly_volume_data() -> pd.DataFrame:
         time_period,
         sum(vehicle_count) as total_vehicles,
         avg(avg_speed_mph) as avg_speed
-    FROM marts.fct_corridor_flows
+    FROM main_marts.fct_corridor_flows
     GROUP BY 1, 2
     ORDER BY 1
     """
@@ -107,7 +107,7 @@ def get_congestion_timeline_data() -> pd.DataFrame:
         corridor_id,
         avg_speed_mph,
         level_of_service
-    FROM marts.fct_corridor_flows
+    FROM main_marts.fct_corridor_flows
     ORDER BY hour_bucket
     """
     return query(sql)

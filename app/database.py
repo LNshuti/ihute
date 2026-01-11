@@ -39,7 +39,13 @@ class Database:
         """Get or create database connection."""
         if self._connection is None:
             if self.db_path and Path(self.db_path).exists():
-                self._connection = duckdb.connect(self.db_path, read_only=True)
+                try:
+                    self._connection = duckdb.connect(self.db_path, read_only=True)
+                except Exception as e:
+                    print(f"Warning: Could not connect to {self.db_path}: {e}")
+                    print("Falling back to in-memory database with sample data.")
+                    self._connection = duckdb.connect(":memory:")
+                    self._create_sample_data()
             else:
                 # Create in-memory database with sample data for demo
                 self._connection = duckdb.connect(":memory:")
@@ -54,9 +60,12 @@ class Database:
         """Create sample data for demo when no database file exists."""
         conn = self._connection
 
+        # Create schema
+        conn.execute("CREATE SCHEMA IF NOT EXISTS main_marts")
+
         # Create sample corridor flows
         conn.execute("""
-            CREATE TABLE marts.fct_corridor_flows AS
+            CREATE TABLE main_marts.fct_corridor_flows AS
             SELECT
                 'I-24' as corridor_id,
                 'I-24 Main' as zone_name,
@@ -82,7 +91,7 @@ class Database:
 
         # Create sample incentive events
         conn.execute("""
-            CREATE TABLE marts.fct_incentive_events AS
+            CREATE TABLE main_marts.fct_incentive_events AS
             SELECT
                 'alloc_' || i as incentive_key,
                 'agent_' || (random() * 1000)::int as agent_id,
@@ -107,7 +116,7 @@ class Database:
 
         # Create sample elasticity metrics
         conn.execute("""
-            CREATE TABLE marts.metrics_elasticity AS
+            CREATE TABLE main_marts.metrics_elasticity AS
             SELECT
                 bucket as incentive_bucket,
                 (100 + bucket * 50) as n_trips,
@@ -122,7 +131,7 @@ class Database:
 
         # Create sample scenario comparison
         conn.execute("""
-            CREATE TABLE marts.fct_simulation_runs AS
+            CREATE TABLE main_marts.fct_simulation_runs AS
             SELECT
                 'run_' || i as run_key,
                 CASE (i % 3)

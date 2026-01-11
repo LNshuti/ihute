@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from ..database import query
+from database import query
 
 
 def get_incentive_funnel_data() -> pd.DataFrame:
@@ -17,7 +17,7 @@ def get_incentive_funnel_data() -> pd.DataFrame:
         count(*) as total_offers,
         sum(case when was_accepted then 1 else 0 end) as accepts,
         sum(case when was_completed then 1 else 0 end) as completions
-    FROM marts.fct_incentive_events
+    FROM main_marts.fct_incentive_events
     GROUP BY incentive_type
     """
     return query(sql)
@@ -54,7 +54,7 @@ def get_spend_by_type_data() -> pd.DataFrame:
         sum(actual_payout) as total_spend,
         count(*) as n_events,
         avg(actual_payout) as avg_payout
-    FROM marts.fct_incentive_events
+    FROM main_marts.fct_incentive_events
     WHERE was_completed
     GROUP BY incentive_type
     ORDER BY total_spend DESC
@@ -94,7 +94,7 @@ def get_effectiveness_data() -> pd.DataFrame:
         count(*) as n_completed,
         sum(actual_payout) as total_cost,
         avg(actual_payout) as avg_cost
-    FROM marts.fct_incentive_events
+    FROM main_marts.fct_incentive_events
     WHERE was_completed
     GROUP BY incentive_type
     """
@@ -135,7 +135,7 @@ def get_uptake_trend_data() -> pd.DataFrame:
         incentive_type,
         final_outcome,
         count(*) as count
-    FROM marts.fct_incentive_events
+    FROM main_marts.fct_incentive_events
     GROUP BY incentive_type, final_outcome
     """
     return query(sql)

@@ -1,0 +1,102 @@
+version: 2
+
+models:
+  - name: stg_sim__agent_decisions
+    description: "Staged agent decision records"
+    columns:
+      - name: decision_id
+        description: "Unique decision identifier"
+        tests:
+          - unique
+          - not_null
+      - name: agent_id
+        description: "Agent identifier"
+        tests:
+          - not_null
+      - name: simulation_run_id
+        description: "Simulation run"
+        tests:
+          - not_null
+      - name: decision_type
+        description: "Type of decision"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['MODE_CHOICE', 'ROUTE_CHOICE', 'DEPARTURE_TIME', 'INCENTIVE_RESPONSE']
+      - name: chosen_option
+        description: "Selected option"
+        tests:
+          - not_null
+
+  - name: stg_sim__incentive_events
+    description: "Staged incentive event records"
+    columns:
+      - name: event_id
+        description: "Unique event identifier"
+        tests:
+          - unique
+          - not_null
+      - name: agent_id
+        description: "Agent involved"
+        tests:
+          - not_null
+      - name: simulation_run_id
+        description: "Simulation run"
+        tests:
+          - not_null
+      - name: incentive_type
+        description: "Type of incentive"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['CARPOOL', 'PACER', 'DEPARTURE_SHIFT', 'TRANSIT']
+      - name: event_type
+        description: "Event type"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['OFFER', 'ACCEPT', 'REJECT', 'COMPLETE', 'EXPIRE', 'CANCEL']
+      - name: amount_usd
+        description: "Incentive amount"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+
+  - name: stg_sim__metrics_timeseries
+    description: "Staged simulation metrics time series"
+    columns:
+      - name: metric_id
+        description: "Unique metric record"
+        tests:
+          - unique
+          - not_null
+      - name: simulation_run_id
+        description: "Simulation run"
+        tests:
+          - not_null
+      - name: metric_name
+        description: "Metric name"
+        tests:
+          - not_null
+      - name: metric_value
+        description: "Metric value"
+        tests:
+          - not_null
+
+  - name: stg_sim__runs
+    description: "Staged simulation run metadata"
+    columns:
+      - name: simulation_run_id
+        description: "Unique run identifier"
+        tests:
+          - unique
+          - not_null
+      - name: scenario_name
+        description: "Scenario name"
+        tests:
+          - not_null
+      - name: started_at
+        description: "Start timestamp"
+        tests:
+          - not_null

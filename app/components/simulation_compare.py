@@ -6,14 +6,14 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from ..database import query
+from database import query
 
 
 def get_scenario_list() -> list[str]:
     """Get list of available scenarios."""
     sql = """
     SELECT DISTINCT scenario_name
-    FROM marts.fct_simulation_runs
+    FROM main_marts.fct_simulation_runs
     ORDER BY scenario_name
     """
     df = query(sql)
@@ -32,7 +32,7 @@ def get_scenario_comparison_data() -> pd.DataFrame:
         vmt_reduction_pct,
         peak_reduction_pct,
         treatment_spend
-    FROM marts.fct_simulation_runs
+    FROM main_marts.fct_simulation_runs
     """
     return query(sql)
 

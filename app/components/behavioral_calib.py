@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from ..database import query
+from database import query
 
 
 def get_elasticity_data() -> pd.DataFrame:
@@ -17,7 +17,7 @@ def get_elasticity_data() -> pd.DataFrame:
         n_trips,
         carpool_rate,
         avg_incentive
-    FROM marts.metrics_elasticity
+    FROM main_marts.metrics_elasticity
     ORDER BY avg_incentive
     """
     return query(sql)

@@ -1,0 +1,75 @@
+name: Deploy dbt Docs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dbt/**'
+      - '.github/workflows/dbt-docs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dbt
+        run: |
+          pip install dbt-core dbt-duckdb
+
+      - name: Install dbt packages
+        working-directory: ./dbt
+        run: dbt deps
+
+      - name: Generate dbt docs
+        working-directory: ./dbt
+        run: |
+          dbt seed --target ci
+          dbt run --target ci
+          dbt docs generate --target ci
+
+      - name: Prepare docs for deployment
+        run: |
+          mkdir -p ./public
+          cp dbt/target/index.html ./public/
+          cp dbt/target/catalog.json ./public/
+          cp dbt/target/manifest.json ./public/
+          # Copy static assets if they exist
+          if [ -d "dbt/target/graph.gpickle" ]; then
+            cp dbt/target/graph.gpickle ./public/
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './public'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

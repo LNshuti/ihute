@@ -1,0 +1,82 @@
+version: 2
+
+sources:
+  - name: laddms
+    description: "LADDMS I-24 MOTION trajectory data from Vanderbilt/CIRCLES project"
+    schema: main
+    tables:
+      - name: raw_trajectories
+        identifier: raw_laddms_trajectories
+        description: "Raw vehicle trajectory JSON data with position/speed arrays"
+        columns:
+          - name: object_id
+            description: "Unique vehicle identifier"
+          - name: location_id
+            description: "Sensor location identifier"
+          - name: classification
+            description: "Vehicle type (VEHICLE, TRUCK, etc.)"
+          - name: sub_classification
+            description: "Vehicle subtype"
+          - name: obj_length
+            description: "Vehicle length in meters"
+          - name: obj_width
+            description: "Vehicle width in meters"
+          - name: obj_height
+            description: "Vehicle height in meters"
+          - name: avg_filtered_confidence
+            description: "Detection confidence score"
+          - name: ts
+            description: "Array of timestamps (seconds)"
+          - name: x
+            description: "Array of x-coordinates"
+          - name: y
+            description: "Array of y-coordinates"
+
+      - name: trajectory_counts
+        identifier: raw_laddms_trajectory_counts
+        description: "Aggregated trajectory counts by time and location"
+        columns:
+          - name: count_id
+            description: "Unique count record identifier"
+          - name: timestamp
+            description: "Time bucket"
+          - name: location_id
+            description: "Sensor location"
+          - name: vehicle_count
+            description: "Number of vehicles observed"
+
+      - name: location_zones
+        identifier: raw_laddms_zones
+        description: "Zone definitions for the I-24 corridor"
+        columns:
+          - name: zone_id
+            description: "Unique zone identifier"
+          - name: zone_name
+            description: "Human-readable zone name"
+          - name: lat_min
+            description: "Minimum latitude bound"
+          - name: lat_max
+            description: "Maximum latitude bound"
+          - name: lon_min
+            description: "Minimum longitude bound"
+          - name: lon_max
+            description: "Maximum longitude bound"
+          - name: mile_marker_start
+            description: "Starting mile marker"
+          - name: mile_marker_end
+            description: "Ending mile marker"
+
+      - name: pet_metrics
+        identifier: raw_laddms_pet
+        description: "Post-Encroachment Time safety metrics"
+        columns:
+          - name: pet_id
+            description: "Unique PET record identifier"
+          - name: object_id_1
+            description: "First vehicle in interaction"
+          - name: object_id_2
+            description: "Second vehicle in interaction"
+          - name: pet_seconds
+            description: "Post-encroachment time in seconds"
+          - name: timestamp
+            description: "Time of interaction"

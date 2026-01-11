@@ -1,0 +1,80 @@
+version: 2
+
+sources:
+  - name: simulation
+    description: "Simulation output data from the agent-based model"
+    schema: main
+    tables:
+      - name: agent_decisions
+        identifier: raw_agent_decisions
+        description: "Agent mode, route, and departure time decisions"
+        columns:
+          - name: decision_id
+            description: "Unique decision identifier"
+          - name: agent_id
+            description: "Agent making the decision"
+          - name: simulation_run_id
+            description: "Simulation run identifier"
+          - name: timestamp
+            description: "Decision timestamp"
+          - name: decision_type
+            description: "Type of decision (MODE, ROUTE, DEPARTURE_TIME)"
+          - name: chosen_option
+            description: "The option chosen"
+          - name: utility
+            description: "Utility value of chosen option"
+
+      - name: incentive_events
+        identifier: raw_incentive_events
+        description: "Incentive offers, acceptances, and completions"
+        columns:
+          - name: event_id
+            description: "Unique event identifier"
+          - name: agent_id
+            description: "Agent involved"
+          - name: simulation_run_id
+            description: "Simulation run identifier"
+          - name: allocation_id
+            description: "Incentive allocation identifier"
+          - name: incentive_type
+            description: "Type of incentive"
+          - name: event_type
+            description: "OFFER, ACCEPT, COMPLETE, EXPIRE"
+          - name: amount
+            description: "Incentive amount"
+          - name: timestamp
+            description: "Event timestamp"
+          - name: conditions
+            description: "Incentive conditions (JSON)"
+          - name: performance_metrics
+            description: "Outcome metrics (JSON)"
+
+      - name: metrics_timeseries
+        identifier: raw_metrics_timeseries
+        description: "Time-series metrics from simulation runs"
+        columns:
+          - name: metric_id
+            description: "Unique metric record identifier"
+          - name: simulation_run_id
+            description: "Simulation run identifier"
+          - name: timestamp
+            description: "Metric timestamp"
+          - name: metric_name
+            description: "Name of the metric"
+          - name: metric_value
+            description: "Value of the metric"
+
+      - name: simulation_runs
+        identifier: raw_simulation_runs
+        description: "Simulation run metadata"
+        columns:
+          - name: simulation_run_id
+            description: "Unique run identifier"
+          - name: scenario_name
+            description: "Scenario being tested"
+          - name: started_at
+            description: "Run start time"
+          - name: completed_at
+            description: "Run completion time"
+          - name: config
+            description: "JSON configuration used"

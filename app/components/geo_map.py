@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from ..database import query
+from database import query
 
 
 def get_corridor_data() -> pd.DataFrame:

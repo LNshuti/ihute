@@ -19,11 +19,11 @@ PET/
 *.h5
 *.hdf5
 
-# Model artifacts
+# Model artifacts (ML models, not dbt models)
 *.pt
 *.pth
 *.onnx
-models/
+src/ml/models/
 !src/ml/models.py
 
 # Large CSVs (keep small config CSVs)
@@ -149,6 +149,10 @@ Thumbs.db
 # ============================================
 # Project Specific
 # ============================================
+
+# DuckDB database files
+*.duckdb
+*.duckdb.wal
 
 # Logs
 logs/
