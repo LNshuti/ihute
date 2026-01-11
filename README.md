@@ -194,7 +194,7 @@ Features extracted:
 - Concert and event calendar
 - Historical traffic patterns from TDOT
 
-## 🔬 Methodology
+## Methodology
 
 ### Agent Behavioral Models
 
