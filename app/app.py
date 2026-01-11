@@ -163,7 +163,6 @@ def create_app():
         gr.Markdown(
             """
             # Nashville Transportation Incentive Simulation
-            **Simulation-Based Evaluation of Incentive Mechanisms for Congestion Mitigation**
 
             Explore traffic patterns, incentive effectiveness, behavioral models, and simulation results
             for the I-24 corridor in Nashville, TN.
@@ -171,8 +170,6 @@ def create_app():
         )
 
         with gr.Tabs():
-            with gr.TabItem("Traffic Flow"):
-                create_traffic_tab()
 
             with gr.TabItem("Incentive Analytics"):
                 create_incentive_tab()
