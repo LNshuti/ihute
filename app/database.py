@@ -119,9 +119,9 @@ class Database:
             CREATE TABLE main_marts.metrics_elasticity AS
             SELECT
                 bucket as incentive_bucket,
-                (100 + bucket * 50) as n_trips,
-                0.1 + bucket * 0.08 as carpool_rate,
-                bucket * 1.5 as avg_incentive
+                (100 + idx * 50) as n_trips,
+                0.1 + idx * 0.08 as carpool_rate,
+                idx * 1.5 as avg_incentive
             FROM (
                 SELECT unnest(['NONE', 'LOW', 'MEDIUM', 'HIGH']) as bucket,
                        unnest([0, 1, 2, 3]) as idx
