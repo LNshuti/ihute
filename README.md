@@ -1,14 +1,12 @@
 # Nashville Transportation Incentive Simulation
 
-**Simulation-Based Evaluation of Incentive Mechanisms for Congestion Mitigation in Nashville Transportation Networks**
+An agent-based simulation framework for evaluating incentive mechanisms to reduce urban congestion. 
 
-An agent-based simulation framework for evaluating incentive mechanisms to reduce urban congestion. This research develops novel computational methods for simulating strategic agent behavior, optimizing reward allocation, and calibrating behavioral models from real-world rideshare data.
+##  About
 
-## Research Objectives
+This project builds algorithms for incentive-based congestion mitigation, treating traffic participants as strategic agents whose behavior can be influenced through carefully designed reward mechanisms.
 
-This project investigates algorithmic approaches to incentive-based congestion mitigation, treating traffic participants as strategic agents whose behavior can be influenced through carefully designed reward mechanisms.
-
-### Core Computer Science Contributions
+### Features
 
 - **Simulation Algorithm Design**: Event-driven agent-based simulation with spatial indexing for large-scale corridor simulations (10,000+ agents)
 - **Incentive Optimization**: Approximation algorithms for optimal reward allocation under budget constraints
@@ -20,7 +18,7 @@ This project investigates algorithmic approaches to incentive-based congestion m
 | Use Case | Objective | Key Mechanism |
 |----------|-----------|---------------|
 | **Pacer Driving** | Reduce stop-and-go waves | Rewards for smooth speed profiles |
-| **I-24 Carpooling** | Increase vehicle occupancy | Time/corridor-specific shared ride incentives |
+| **Carpooling** | Increase vehicle occupancy | Time/corridor-specific shared ride incentives |
 | **Event Egress** | Flatten post-Titans game peaks | Departure delay & mode-shift rewards |
 | **Transit Promotion** | Encourage mode shift | Geofenced peak-period transit incentives |
 
@@ -53,7 +51,7 @@ This project investigates algorithmic approaches to incentive-based congestion m
 ## Project Structure
 
 ```
-nashville-incentive-sim/
+ihute/
 ├── src/
 │   ├── agents/              # Agent models and behavior
 │   │   ├── base.py          # Base agent class
@@ -107,8 +105,8 @@ nashville-incentive-sim/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/nashville-incentive-sim.git
-cd nashville-incentive-sim
+git clone https://github.com/yourusername/ihute.git
+cd ihute
 
 # Create virtual environment
 python -m venv venv
@@ -116,36 +114,6 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -e ".[dev]"
-```
-
-### Run a Basic Simulation
-
-```python
-from src.simulation import SimulationEngine
-from src.agents import CommuterAgent
-from src.incentives import CarpoolIncentive
-
-# Initialize simulation
-engine = SimulationEngine.from_config("configs/i24_corridor.yaml")
-
-# Add agents
-engine.populate_agents(n_agents=5000, agent_class=CommuterAgent)
-
-# Configure incentive mechanism
-incentive = CarpoolIncentive(
-    reward_per_passenger=2.0,
-    peak_multiplier=1.5,
-    budget_limit=10000
-)
-engine.add_incentive(incentive)
-
-# Run simulation
-results = engine.run(duration_hours=3, warmup_hours=0.5)
-
-# Analyze results
-print(f"Peak demand reduction: {results.peak_reduction_pct:.1f}%")
-print(f"Average vehicle occupancy: {results.avg_occupancy:.2f}")
-print(f"Incentive efficiency: ${results.cost_per_vmt_reduced:.2f}/VMT")
 ```
 
 ### Command Line Interface
@@ -419,21 +387,3 @@ cd app && gradio app.py
 
 **Live Demo:** https://huggingface.co/spaces/LeonceNsh/ihute
 
-## References
-
-### Algorithmic Game Theory
-- Nisan et al. (2007). *Algorithmic Game Theory*. Cambridge University Press.
-- Roughgarden (2016). *Twenty Lectures on Algorithmic Game Theory*. Cambridge.
-
-### Traffic Flow Theory
-- Treiber & Kesting (2013). *Traffic Flow Dynamics*. Springer.
-- Stern et al. (2018). Dissipation of stop-and-go waves via control of autonomous vehicles. *Transportation Research Part C*.
-
-### Incentive Mechanism Design
-- Mirrokni et al. (2012). Optimal marketing strategies over social networks. *WWW*.
-- Chen et al. (2015). Peeking beneath the hood of Uber. *IMC*.
-
-## Contributors
-
-- **Leonce Nshuti** - Primary Researcher - Vanderbilt University
-- **MobileFlow/Hytch** - External Collaborator - Domain expertise and data access
