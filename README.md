@@ -301,30 +301,5 @@ cd app && python app.py
 cd app && gradio app.py
 ```
 
-**Deploy to Hugging Face Spaces:**
-1. Create a new Space at [huggingface.co/new-space](https://huggingface.co/new-space)
-2. Select "Gradio" as the SDK
-3. Clone your Space repository:
-   ```bash
-   git clone https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
-   ```
-4. Copy the app files:
-   ```bash
-   cp -r app/* YOUR_SPACE_NAME/
-   cp warehouse.duckdb YOUR_SPACE_NAME/  # Include database
-   ```
-5. Create `requirements.txt` in the Space:
-   ```
-   gradio>=4.0.0
-   plotly>=5.0.0
-   duckdb>=0.9.0
-   pandas>=2.0.0
-   ```
-6. Push to deploy:
-   ```bash
-   cd YOUR_SPACE_NAME
-   git add . && git commit -m "Deploy dashboard" && git push
-   ```
-
 **Live Demo:** https://huggingface.co/spaces/LeonceNsh/ihute
 
