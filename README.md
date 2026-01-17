@@ -4,14 +4,13 @@ An agent-based simulation framework for evaluating incentive mechanisms to reduc
 
 ##  About
 
-This project builds algorithms for incentive-based congestion mitigation, treating traffic participants as strategic agents whose behavior can be influenced through carefully designed reward mechanisms.
+This project builds algorithms for incentive-based congestion mitigation, treating traffic participants as strategic **agents whose behavior can be influenced through carefully designed reward mechanisms**.
 
 ### Features
 
-- **Simulation Algorithm Design**: Event-driven agent-based simulation with spatial indexing for large-scale corridor simulations (10,000+ agents)
+- **Simulation Algorithm Design**: Event-driven simulation with spatial indexing for large-scale corridor simulations (10,000+ agents)
 - **Incentive Optimization**: Approximation algorithms for optimal reward allocation under budget constraints
-- **Behavioral Model Learning**: ML techniques to extract response functions from 369,831 historical rideshare trips
-- **Equilibrium Computation**: Algorithms for computing Nash/Stackelberg equilibria in incentive-mediated systems
+- **Behavioral Model Learning**: ML techniques to extract response functions from a growing dataset of 369,831+ historical rideshare trips
 
 ### Incentive Use Cases
 
@@ -105,7 +104,7 @@ ihute/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ihute.git
+git clone https://github.com/LNshuti/ihute.git
 cd ihute
 
 # Create virtual environment
@@ -256,32 +255,6 @@ python -m scripts.run_experiments --experiment event_egress \
 
 
 ## Development
-
-### Running Tests
-
-```bash
-# All tests
-pytest tests/ -v
-
-# With coverage
-pytest tests/ --cov=src --cov-report=html
-
-# Specific test module
-pytest tests/test_simulation.py -v
-```
-
-### Code Quality
-
-```bash
-# Format code
-black src/ tests/
-
-# Lint
-ruff check src/ tests/
-
-# Type checking
-mypy src/
-```
 
 ### Building Documentation
 
