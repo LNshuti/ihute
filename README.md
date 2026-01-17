@@ -243,17 +243,6 @@ python -m scripts.run_experiments --experiment carpool_elasticity \
     --targeting-precision low medium high
 ```
 
-### Experiment 3: Event Egress Optimization
-
-**Question**: Are small delays across many participants more effective than large delays for few?
-
-```bash
-python -m scripts.run_experiments --experiment event_egress \
-    --delay-distribution uniform concentrated \
-    --total-delay-budget 1000
-```
-
-
 ## Development
 
 ### Building Documentation
