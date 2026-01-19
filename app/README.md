@@ -15,6 +15,8 @@ tags:
   - incentives
   - nashville
   - traffic
+  - demographics
+  - agent-based-modeling
 ---
 
 # Nashville Transportation Incentive Simulation Dashboard
@@ -26,6 +28,7 @@ Interactive dashboard for evaluating incentive mechanisms to reduce urban conges
 - **Traffic Flow Analysis**: Real-time and historical speed heatmaps, volume patterns, and congestion timelines
 - **Incentive Analytics**: Conversion funnels, spending analysis, and cost-effectiveness metrics
 - **Behavioral Calibration**: ML model performance, elasticity curves, and feature importance
+- **Demographics Analysis** ✨ NEW: Income distribution, poverty rates, and behavioral impact across 376 Nashville ZCTAs
 - **Simulation Comparison**: Scenario analysis comparing treatment effects against baseline
 - **Live Metrics**: Key performance indicators with trend sparklines
 - **Corridor Map**: Interactive map with traffic conditions and zone statistics
@@ -34,6 +37,7 @@ Interactive dashboard for evaluating incentive mechanisms to reduce urban conges
 
 - **Hytch Rideshare Trips**: 369,831 historical trips for behavioral calibration
 - **LADDMS**: I-24 GPS trajectory data
+- **Population-Dyna Demographics**: 376 Tennessee ZCTAs with income and poverty data
 - **Simulation Outputs**: Agent-based model results
 
 ## Technology Stack

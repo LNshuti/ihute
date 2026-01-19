@@ -36,6 +36,12 @@ class CommuterProfile:
     carpool_eligible: bool = True
     work_days: list[int] = None  # 0=Monday, ..., 6=Sunday
 
+    # Demographic attributes (from population-dyna)
+    home_zcta: Optional[str] = None  # 5-digit ZCTA code
+    household_income: Optional[float] = None  # Annual income in USD
+    poverty_rate: Optional[float] = None  # ZCTA poverty rate (0-1)
+    income_quintile: Optional[int] = None  # 1-5 (1=lowest, 5=highest)
+
     def __post_init__(self):
         if self.work_days is None:
             self.work_days = [0, 1, 2, 3, 4]  # Mon-Fri
@@ -410,6 +416,90 @@ class CommuterAgent(BaseAgent):
         }
 
 
+def create_demographic_aware_preferences(
+    demographics: Any,  # ZCTADemographics
+    base_params: Optional[Any] = None,  # PopulationParameters
+    rng: Optional[np.random.Generator] = None,
+) -> AgentPreferences:
+    """
+    Generate preferences calibrated to demographic attributes.
+
+    Income influences:
+    - Value of Time (VOT): 50% of hourly wage (DOT guidance)
+    - Cost sensitivity: Higher for low-income (stronger response to costs)
+    - Incentive sensitivity: Higher for low-income (stronger response to rewards)
+
+    Args:
+        demographics: ZCTADemographics object with income/poverty data
+        base_params: Base population parameters (uses defaults if None)
+        rng: Random number generator
+
+    Returns:
+        AgentPreferences calibrated to demographics
+    """
+    from .base import (
+        AgentPreferences,
+        DecisionRule,
+        PopulationParameters,
+    )
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    if base_params is None:
+        base_params = PopulationParameters()
+
+    # Value of Time: 50% of hourly wage
+    hourly_wage = demographics.median_household_income_est / 2080  # Annual to hourly
+    vot = hourly_wage * 0.50
+
+    # Use calibrated parameters if available, otherwise derive from income quintile
+    if demographics.avg_beta_incentive is not None:
+        beta_incentive_base = demographics.avg_beta_incentive
+    else:
+        # Inverse relationship: Q1 (low income) → 1.5x, Q5 (high income) → 0.5x
+        incentive_multiplier = 2.0 - (demographics.income_quintile * 0.3)
+        beta_incentive_base = base_params.beta_incentive_mean * incentive_multiplier
+
+    # Cost sensitivity (inverse to income)
+    cost_multiplier = 2.0 - (demographics.income_quintile * 0.3)
+    beta_cost_base = base_params.beta_cost_mean * cost_multiplier
+
+    # Add noise to avoid deterministic agents within same ZCTA
+    beta_time = np.clip(
+        rng.normal(base_params.beta_time_mean, base_params.beta_time_std), -0.2, 0
+    )
+    beta_cost = np.clip(rng.normal(beta_cost_base, base_params.beta_cost_std), -0.5, 0)
+    beta_incentive = np.clip(
+        rng.normal(beta_incentive_base, base_params.beta_incentive_std), 0, 0.5
+    )
+
+    # Sample decision rule
+    rule_probs = [
+        base_params.prob_softmax,
+        base_params.prob_utility_max,
+        base_params.prob_epsilon_greedy,
+    ]
+    rule_idx = rng.choice(3, p=rule_probs)
+    decision_rule = [
+        DecisionRule.SOFTMAX,
+        DecisionRule.UTILITY_MAX,
+        DecisionRule.EPSILON_GREEDY,
+    ][rule_idx]
+
+    # Sample temperature
+    temperature = max(0.1, rng.normal(base_params.temperature_mean, base_params.temperature_std))
+
+    return AgentPreferences(
+        vot=vot,
+        beta_time=beta_time,
+        beta_cost=beta_cost,
+        beta_incentive=beta_incentive,
+        decision_rule=decision_rule,
+        temperature=temperature,
+    )
+
+
 def create_commuter_population(
     n_agents: int,
     home_region: tuple[
@@ -466,6 +556,109 @@ def create_commuter_population(
             has_car=rng.random() > 0.1,  # 90% have cars
             has_transit_pass=rng.random() > 0.7,  # 30% have transit passes
             carpool_eligible=rng.random() > 0.2,  # 80% eligible for carpool
+        )
+
+        agent = CommuterAgent(
+            agent_id=f"commuter_{i:05d}",
+            preferences=preferences,
+            profile=profile,
+            rng=rng,
+        )
+        agents.append(agent)
+
+    return agents
+
+
+def create_demographic_commuter_population(
+    n_agents: int,
+    home_region: tuple[tuple[float, float], tuple[float, float]],
+    work_region: tuple[tuple[float, float], tuple[float, float]],
+    arrival_time_dist: tuple[float, float] = (8 * 3600, 1800),
+    warehouse_path: str = "warehouse.duckdb",
+    rng: Optional[np.random.Generator] = None,
+) -> list[CommuterAgent]:
+    """
+    Create a population of commuter agents with demographics-based preferences.
+
+    Agents are sampled from Tennessee ZCTAs and assigned demographic attributes
+    (income, poverty rate, quintile) that calibrate their behavioral parameters.
+
+    Args:
+        n_agents: Number of agents to create
+        home_region: Bounding box for home locations
+        work_region: Bounding box for work locations
+        arrival_time_dist: (mean, std) of desired arrival times
+        warehouse_path: Path to DuckDB warehouse with demographics
+        rng: Random number generator
+
+    Returns:
+        List of CommuterAgent instances with demographic attributes
+    """
+    from pathlib import Path
+
+    from .base import PopulationParameters
+
+    # Import demographics module
+    import sys
+    from pathlib import Path as P
+
+    # Add src to path if not already there
+    src_path = P(__file__).parent.parent
+    if str(src_path) not in sys.path:
+        sys.path.insert(0, str(src_path))
+
+    from data.demographics import DemographicLoader
+
+    if rng is None:
+        rng = np.random.default_rng()
+
+    pop_params = PopulationParameters(n_agents=n_agents)
+
+    # Load demographics
+    with DemographicLoader(warehouse_path) as loader:
+        # Sample ZCTAs for the population
+        zcta_samples = loader.sample_zctas(n=n_agents, state_prefix="37")
+
+    agents = []
+
+    for i, demographics in enumerate(zcta_samples):
+        # Generate random home and work locations
+        home = (
+            rng.uniform(home_region[0][0], home_region[1][0]),
+            rng.uniform(home_region[0][1], home_region[1][1]),
+        )
+        work = (
+            rng.uniform(work_region[0][0], work_region[1][0]),
+            rng.uniform(work_region[0][1], work_region[1][1]),
+        )
+
+        # Generate arrival time
+        arrival_time = rng.normal(arrival_time_dist[0], arrival_time_dist[1])
+        arrival_time = np.clip(arrival_time, 6 * 3600, 10 * 3600)  # 6 AM - 10 AM
+
+        # Generate demographic-aware preferences
+        preferences = create_demographic_aware_preferences(
+            demographics, pop_params, rng
+        )
+
+        # Car ownership depends on income (higher income → more likely)
+        # Logistic function: P(car) = 1 / (1 + exp(-(income - 40000) / 10000))
+        car_prob = 1 / (1 + np.exp(-(demographics.median_household_income_est - 40000) / 10000))
+        has_car = rng.random() < car_prob
+
+        # Create profile with demographic attributes
+        profile = CommuterProfile(
+            home_location=home,
+            work_location=work,
+            desired_arrival_time=arrival_time,
+            has_car=has_car,
+            has_transit_pass=rng.random() > 0.7,  # 30% have transit passes
+            carpool_eligible=rng.random() > 0.2,  # 80% eligible for carpool
+            # Demographic fields
+            home_zcta=demographics.zcta_code,
+            household_income=demographics.median_household_income_est,
+            poverty_rate=demographics.poverty_rate,
+            income_quintile=demographics.income_quintile,
         )
 
         agent = CommuterAgent(

@@ -1,0 +1,109 @@
+# Pacer Incentive Simulation Configuration
+# I-24 Corridor Flow Stabilization Study
+
+simulation:
+  name: "I-24 Pacer Flow Stabilization"
+  description: "Evaluate pacer driver incentive effectiveness on I-24 corridor"
+  duration_hours: 4.0
+  warmup_minutes: 30
+  random_seed: 42
+
+  # Time window (relative to simulation start)
+  # Represents morning rush hour 6:00 AM - 10:00 AM
+  peak_start_hour: 0.5   # 30 min into simulation
+  peak_end_hour: 3.5     # 3.5 hours into simulation
+
+network:
+  type: "i24"
+  corridor:
+    name: "I-24 Inbound"
+    length_miles: 15.0
+    free_flow_speed_mph: 65.0
+    capacity_vph: 2000
+    num_lanes: 3
+
+  # Geographic bounds (Nashville I-24 corridor)
+  bounds:
+    north: 36.20
+    south: 36.05
+    east: -86.60
+    west: -86.90
+
+  # Origin zone: Southeast Nashville suburbs
+  origin_region:
+    center: [36.08, -86.65]
+    radius_km: 10
+
+  # Destination zone: Downtown Nashville
+  destination_region:
+    center: [36.16, -86.78]
+    radius_km: 5
+
+agents:
+  # Total agents (can be overridden by --agents flag)
+  total: 10000
+
+  # Agent type distribution
+  pacer_fraction: 0.10  # 10% are enrolled pacers
+
+  # Commuter population parameters
+  commuter:
+    vot_mean: 25.0        # Value of time ($/hour)
+    vot_std: 10.0
+    flexibility_mean: 1800  # Schedule flexibility (seconds)
+    flexibility_std: 600
+    car_ownership: 0.90     # Fraction with cars
+
+  # Pacer driver parameters
+  pacer:
+    driving_skill_mean: 0.80
+    driving_skill_std: 0.10
+    max_speed_reduction: 0.20  # Max acceptable speed reduction
+    incentive_sensitivity: 1.5  # Multiplier on beta_incentive
+
+  # Arrival time distribution
+  arrival_time:
+    mean_hour: 8.0        # 8:00 AM
+    std_minutes: 30
+
+incentives:
+  pacer:
+    enabled: true
+    reward_per_mile: 0.15
+    smoothness_threshold: 0.70
+    smoothness_bonus_rate: 0.10
+    min_distance_miles: 2.0
+    max_reward_per_session: 20.00
+
+    # Target speeds by corridor segment
+    target_speeds:
+      default: 55.0
+      congested: 45.0
+
+    # Active hours (0-24)
+    active_hours: [6, 7, 8, 9, 17, 18, 19]
+    peak_multiplier: 1.5
+
+    # Daily budget constraint
+    budget_daily: 5000
+
+output:
+  directory: "results/pacer_i24"
+
+  # What to save
+  save_trajectories: false
+  save_agent_history: false
+  save_metrics: true
+  save_raw_data: true
+
+  # Metrics snapshot interval
+  metrics_interval_seconds: 300  # 5 minutes
+
+  # Output formats
+  formats:
+    - csv
+    - json
+
+logging:
+  level: "INFO"
+  file: "logs/pacer_i24.log"

@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: stg_zcta_demographics
+    description: "ZCTA-level demographic data from population-dyna platform"
+    columns:
+      - name: zcta_code
+        description: "5-digit ZCTA code (Tennessee only, 37xxx)"
+        tests:
+          - unique
+          - not_null
+      - name: poverty_rate
+        description: "Poverty rate from 2022 (0-1 scale)"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1
+      - name: median_household_income_est
+        description: "Estimated median household income (derived from poverty rate)"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 20000
+              max_value: 150000
+      - name: income_quintile
+        description: "Income quintile (1=lowest, 5=highest)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+      - name: loaded_at
+        description: "Timestamp when data was loaded"
+        tests:
+          - not_null

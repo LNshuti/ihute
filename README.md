@@ -10,7 +10,66 @@ This project builds algorithms for incentive-based congestion mitigation, treati
 
 - **Simulation Algorithm Design**: Event-driven simulation with spatial indexing for large-scale corridor simulations (10,000+ agents)
 - **Incentive Optimization**: Approximation algorithms for optimal reward allocation under budget constraints
+<<<<<<< HEAD
 - **Behavioral Model Learning**: ML techniques to extract response functions from a growing dataset of 369,831+ historical rideshare trips
+=======
+- **Behavioral Model Learning**: ML techniques to extract response functions from 369,831 historical rideshare trips
+- **Equilibrium Computation**: Algorithms for computing Nash/Stackelberg equilibria in incentive-mediated systems
+- **Demographic Integration**: Agent profiles enriched with ZCTA-level demographics (income, poverty) from population-dyna platform for realistic behavioral heterogeneity
+
+### Demographic-Aware Agent Modeling
+
+Agents are enriched with ZCTA-level demographics from the **[population-dyna](https://github.com/LNshuti/population-dyna)** platform, enabling income-stratified analysis and realistic behavioral heterogeneity.
+
+**Data Coverage:**
+- **376 Tennessee ZCTAs** (Nashville and surrounding areas)
+- Income range: $14k-$70k (avg $62k)
+- Poverty rates: 0-100% (avg 14%)
+- Even distribution across 5 income quintiles
+
+**Behavioral Calibration:**
+
+Demographics influence agent preferences through empirically-grounded relationships:
+
+| Demographic | Impact | Formula/Relationship |
+|-------------|--------|---------------------|
+| **Household Income** | Value of Time (VOT) | 50% of hourly wage (DOT guidance) |
+| **Income Quintile** | Incentive Sensitivity | Q1 (low) → 2.66x more responsive than Q5 (high) |
+| **Income Quintile** | Cost Sensitivity | Q1 → 1.5x baseline, Q5 → 0.5x baseline |
+| **Income** | Car Ownership | Logistic function: P(car) = 1/(1+exp(-(income-40k)/10k)) |
+
+**Key Results:**
+- **VOT Variation:** $13/hr (low income) → $16/hr (high income)
+- **Incentive Response:** 2.66x higher for low-income agents
+- **Spatial Heterogeneity:** Agents distributed across 376 ZCTAs with realistic income patterns
+
+**Usage Example:**
+
+```python
+from src.agents.commuter import create_demographic_commuter_population
+
+# Create agents with Nashville demographics
+agents = create_demographic_commuter_population(
+    n_agents=1000,
+    home_region=((36.0, -87.0), (36.4, -86.5)),  # Nashville bbox
+    work_region=((36.1, -86.9), (36.3, -86.6)),
+    warehouse_path="warehouse.duckdb",
+)
+
+# Each agent has:
+# - profile.home_zcta (e.g., "37203")
+# - profile.household_income ($14k-$70k)
+# - profile.income_quintile (1-5)
+# - preferences.vot (calibrated to income)
+# - preferences.beta_incentive (income-dependent)
+```
+
+**Research Questions Enabled:**
+- "Do low-income neighborhoods benefit more from carpool incentives?"
+- "Which ZCTAs have highest pacer participation potential?"
+- "Are current incentives equitable across income groups?"
+- "How does income affect mode choice and schedule flexibility?"
+>>>>>>> f08c9f0 (add demog)
 
 ### Incentive Use Cases
 
@@ -79,6 +138,7 @@ ihute/
 │   │   └── validation.py    # Cross-validation and testing
 │   ├── data/                # Data loading and processing
 │   │   ├── hytch.py         # Hytch rideshare data loader
+│   │   ├── demographics.py  # ZCTA demographics loader (population-dyna)
 │   │   ├── network.py       # Road network data (OSM)
 │   │   └── events.py        # Event schedules (Titans games)
 │   └── utils/               # Utilities
@@ -119,13 +179,13 @@ pip install -e ".[dev]"
 
 ```bash
 # Run pacer simulation on I-24
-python -m scripts.run_simulation --config configs/pacer_i24.yaml --agents 10000
+python -m scripts.run_simulation --config configs/pacer_i24.yaml --agents 100000
 
 # Train behavioral model from Hytch data
 python -m scripts.train_model --data data/raw/hytch_trips.parquet --output data/models/
 
 # Optimize incentive allocation
-python -m scripts.optimize --scenario titans_game --budget 50000 --algorithm greedy
+python -m scripts.optimize --scenario titans_game --budget 500000 --algorithm greedy
 
 # Run full experiment suite
 python -m scripts.run_experiments --suite all --output results/
@@ -160,6 +220,29 @@ Features extracted:
 - Titans game schedules (Nissan Stadium)
 - Concert and event calendar
 - Historical traffic patterns from TDOT
+
+### Demographics Data (population-dyna)
+
+**Source:** [population-dyna platform](https://github.com/LNshuti/population-dyna)
+
+| Metric | Value |
+|--------|-------|
+| Total ZCTAs | 376 (Tennessee) |
+| Coverage | Nashville + surrounding areas |
+| Income Range | $14k - $70k |
+| Avg Poverty Rate | 14.1% |
+| Data Vintage | 2020-2022 |
+
+**Datasets Used:**
+- `zcta_poverty.parquet` - ZCTA-level poverty rates (2011-2022)
+- `county_unemployment.parquet` - County unemployment time series (1990-2024)
+- Derived: Median household income estimates from poverty rates
+
+**Integration:**
+- Loaded into DuckDB via dbt pipeline
+- 376 ZCTAs with income quintiles, poverty rates
+- Used to calibrate agent VOT and behavioral parameters
+- Enables income-stratified simulation analysis
 
 ## Methodology
 
@@ -230,7 +313,7 @@ For multi-agent strategic interactions:
 ```bash
 python -m scripts.run_experiments --experiment pacer_threshold \
     --participation-rates 0.01 0.02 0.05 0.10 0.15 0.20 \
-    --replications 30
+    --replications 3000
 ```
 
 ### Experiment 2: Carpool Incentive Elasticity
@@ -243,6 +326,20 @@ python -m scripts.run_experiments --experiment carpool_elasticity \
     --targeting-precision low medium high
 ```
 
+<<<<<<< HEAD
+=======
+### Experiment 3: Event Egress Optimization
+
+**Question**: Are small delays across many participants more effective than large delays for few?
+
+```bash
+python -m scripts.run_experiments --experiment event_egress \
+    --delay-distribution uniform concentrated \
+    --total-delay-budget 100000
+```
+
+
+>>>>>>> f08c9f0 (add demog)
 ## Development
 
 ### Building Documentation

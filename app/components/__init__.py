@@ -49,3 +49,13 @@ from .traffic_flow import (
     get_hourly_volume_data,
     get_speed_heatmap_data,
 )
+from .demographics import (
+    get_demographics_summary,
+    create_summary_cards,
+    get_income_distribution,
+    create_income_distribution_chart,
+    create_poverty_distribution_chart,
+    get_zcta_details,
+    create_zcta_table,
+    create_behavioral_impact_chart,
+)

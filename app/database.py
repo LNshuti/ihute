@@ -149,6 +149,29 @@ class Database:
             FROM generate_series(1, 10) as t(i)
         """)
 
+        # Create sample demographics data (from population-dyna integration)
+        conn.execute("""
+            CREATE TABLE main_marts.dim_demographics AS
+            SELECT
+                '37' || LPAD(i::text, 3, '0') as zcta_code,
+                0.05 + (random() * 0.25) as poverty_rate,
+                (50000 + random() * 30000)::int as median_household_income_est,
+                CASE
+                    WHEN i <= 75 THEN 1
+                    WHEN i <= 150 THEN 2
+                    WHEN i <= 225 THEN 3
+                    WHEN i <= 300 THEN 4
+                    ELSE 5
+                END as income_quintile,
+                NULL::DOUBLE as avg_beta_cost,
+                NULL::DOUBLE as avg_beta_incentive,
+                NULL::DOUBLE as avg_vot,
+                NULL::TIMESTAMP as poverty_rate_2021,
+                NULL::TIMESTAMP as poverty_rate_2020,
+                CURRENT_TIMESTAMP as loaded_at
+            FROM generate_series(1, 376) as t(i)
+        """)
+
 
 # Global database instance
 _db: Optional[Database] = None

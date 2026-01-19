@@ -32,7 +32,14 @@ from components import (
     # Geo map
     get_corridor_data, create_corridor_map,
     get_zone_stats, create_zone_comparison,
+    # Demographics
+    get_demographics_summary, create_summary_cards,
+    get_income_distribution, create_income_distribution_chart,
+    create_poverty_distribution_chart, get_zcta_details,
+    create_zcta_table, create_behavioral_impact_chart,
 )
+
+from nashville_sim_integration import create_nashville_simulation_tab
 
 
 def create_traffic_tab():
@@ -157,6 +164,57 @@ def create_map_tab():
         gr.Plot(value=create_zone_comparison(zone_data), label="Zone Comparison")
 
 
+def create_demographics_tab():
+    """Create demographics analysis tab."""
+    with gr.Column():
+        gr.Markdown("## Demographics Analysis")
+        gr.Markdown(
+            """
+            Agent behavioral heterogeneity calibrated from **population-dyna** platform.
+
+            **376 Tennessee ZCTAs** with income, poverty, and behavioral parameters.
+            """
+        )
+
+        # Summary statistics
+        summary_data = get_demographics_summary()
+        gr.Plot(value=create_summary_cards(summary_data), label="Demographics Summary")
+
+        # Distribution charts
+        gr.Markdown("### Income & Poverty Distribution")
+        income_data = get_income_distribution()
+
+        with gr.Row():
+            gr.Plot(
+                value=create_income_distribution_chart(income_data),
+                label="Income by Quintile"
+            )
+            gr.Plot(
+                value=create_poverty_distribution_chart(income_data),
+                label="Poverty by Quintile"
+            )
+
+        # Behavioral impact
+        gr.Markdown("### Behavioral Calibration")
+        gr.Markdown(
+            """
+            Demographic data calibrates agent preferences:
+            - **VOT (Value of Time)**: 50% of hourly wage
+            - **Incentive Sensitivity**: 2.66x higher for low-income (Q1 vs Q5)
+            - **Car Ownership**: Logistic function of income
+            """
+        )
+        gr.Plot(
+            value=create_behavioral_impact_chart(),
+            label="Behavioral Parameters"
+        )
+
+        # ZCTA details table
+        gr.Markdown("### ZCTA Details")
+        zcta_data = get_zcta_details()
+        gr.Plot(value=create_zcta_table(zcta_data), label="Top ZCTAs by Poverty")
+
+
 def create_app():
     """Create the main Gradio application."""
     with gr.Blocks(title="Nashville Incentive Simulation Dashboard") as app:
@@ -177,6 +235,9 @@ def create_app():
             with gr.TabItem("Behavioral Calibration"):
                 create_behavioral_tab()
 
+            with gr.TabItem("Demographics"):
+                create_demographics_tab()
+
             with gr.TabItem("Simulation Comparison"):
                 create_simulation_tab()
 
@@ -186,10 +247,13 @@ def create_app():
             with gr.TabItem("Corridor Map"):
                 create_map_tab()
 
+            with gr.TabItem("Nashville Simulation"):
+                create_nashville_simulation_tab()
+
         gr.Markdown(
             """
             ---
-            *Data sources: LADDMS I-24 MOTION trajectories, Hytch rideshare trips, simulation outputs*
+            *Data sources: LADDMS I-24 MOTION trajectories, Hytch rideshare trips, population-dyna demographics, simulation outputs*
 
             Built with DuckDB, dbt, and Gradio | [GitHub](https://github.com/LNshuti/ihute)
             """
